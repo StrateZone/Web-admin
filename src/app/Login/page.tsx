@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import { Button, Input } from "@material-tailwind/react";
-import axios from "axios"; // Import axios
+import axios from "axios";
 import { useRouter } from "next/navigation";
-
+import { toast } from "react-toastify"; // Import từ react-toastify
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -21,6 +21,7 @@ export default function LoginPage() {
       setEmailError("Email không được bỏ trống");
     } else if (!emailRegex.test(email)) {
       setEmailError("Email không hợp lệ");
+      return;
     } else {
       setEmailError("");
     }
@@ -31,7 +32,7 @@ export default function LoginPage() {
       //xu ly ben trong luon ko ca`n tach ra
       try {
         const response = await axios.post(
-          `https://backend-production-5bc5.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email)}`,
+          `https://backend-production-5bc5.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email)}`
         );
 
         console.log("API Response:", response.data); // Kiểm tra dữ liệu trả về
@@ -41,6 +42,7 @@ export default function LoginPage() {
           response.data?.success === false ||
           response.data?.statusCode === 404
         ) {
+          toast.error("Tài khoản không tồn tại. Vui lòng kiểm tra lại email.");
           return; // Dừng lại nếu tài khoản không tồn tại
         }
 
@@ -52,12 +54,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div>
-      <div className="relative min-h-screen w-full bg-[url('https://png.pngtree.com/background/20230611/original/pngtree-rain-storm-and-a-chess-board-picture-image_3129264.jpg')] bg-cover bg-center bg-repeat flex items-center justify-center">
+    <div className="fixed inset-0">
+      {/* Thay đổi ở đây - sử dụng fixed inset-0 */}
+      <div className="w-full h-full bg-[url('https://png.pngtree.com/background/20230611/original/pngtree-rain-storm-and-a-chess-board-picture-image_3129264.jpg')] bg-cover bg-center bg-no-repeat flex items-center justify-center">
         <div className="absolute inset-0 bg-gray-900/60" />
         <div
-          style={{ marginTop: "120px", marginBottom: "50px" }}
           className="relative w-full max-w-screen-sm mx-auto border-2 border-white bg-transparent bg-opacity-95 backdrop-blur-sm opacity-90 p-8 rounded-md shadow-lg"
+          style={{ margin: "auto" }}
         >
           <div className="text-white text-center flex flex-col gap-4">
             <div className="flex flex-col gap-4">
