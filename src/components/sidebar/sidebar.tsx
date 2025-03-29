@@ -1,31 +1,33 @@
 "use client"; // Bắt buộc nếu dùng useRouter hoặc Redux trong Next.js App Router
 
-import { Button } from "@material-tailwind/react";
-
 import { useRouter, usePathname } from "next/navigation"; // Thay thế useNavigate & useLocation
 
 const menu = [
-  { name: "Home", path: "/home" },
+  { name: "Home", path: "/home", icon: "🏠" },
   {
     name: "Portfolio",
     path: "/portfolio",
+    icon: "📁",
   },
   {
     name: "Watchlist",
     path: "/watchlist",
+    icon: "🔖",
   },
   {
     name: "Activity",
     path: "/activity",
+    icon: "📊",
   },
-  { name: "Wallet", path: "/wallet" },
+  { name: "Wallet", path: "/wallet", icon: "💼" },
   {
     name: "Payment Detail",
     path: "/payment-details",
+    icon: "💳",
   },
-  { name: "Withdraw", path: "/withdraw" },
-  { name: "Profile", path: "/profile" },
-  { name: "Logout", path: "#" },
+  { name: "Withdraw", path: "/withdraw", icon: "💸" },
+  { name: "Profile", path: "/profile", icon: "👤" },
+  { name: "Logout", path: "#", icon: "🚪" },
 ];
 
 const Sidebar = () => {
@@ -42,7 +44,7 @@ const Sidebar = () => {
     <div className="mt-10 space-y-5">
       {menu.map((item) => (
         <div key={item.name} className="w-full">
-          <Button
+          <button
             className={`flex items-center gap-2 py-3 w-full ${
               pathname === item.path ? "bg-gray-200" : "" // Hiển thị active tab
             }`}
@@ -56,7 +58,7 @@ const Sidebar = () => {
           >
             <span className="w-8">{item.icon}</span>
             <p>{item.name}</p>
-          </Button>
+          </button>
         </div>
       ))}
     </div>

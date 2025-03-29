@@ -1,7 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@material-tailwind/react";
 import axios from "axios";
 import Link from "next/link";
 
@@ -183,12 +182,12 @@ export default function OTPVerificationPage() {
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             {/* Nút xác nhận OTP */}
-            <Button
+            <button
               onClick={handleVerifyOTP}
               className="w-full font-bold bg-black text-white py-2 rounded border border-gray-500 hover:bg-gray-800 transition duration-150 ease-in-out mt-3"
             >
               Xác nhận OTP
-            </Button>
+            </button>
 
             {/* Gửi lại mã OTP */}
             <div className="text-center text-sm mt-3">
