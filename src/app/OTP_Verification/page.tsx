@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@material-tailwind/react";
 import axios from "axios";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export default function OTPVerificationPage() {
   const router = useRouter();
@@ -127,72 +128,74 @@ export default function OTPVerificationPage() {
     }
   };
   return (
-    <div>
-      <div className="relative min-h-screen w-full bg-[url('https://png.pngtree.com/background/20230611/original/pngtree-rain-storm-and-a-chess-board-picture-image_3129264.jpg')] bg-cover bg-center bg-repeat flex items-center justify-center">
-        <div className="absolute inset-0 bg-gray-900/60" />
-        <div
-          style={{ marginTop: "80px" }}
-          className="relative w-full max-w-screen-sm mx-auto border border-white bg-transparent bg-opacity-90 backdrop-blur-sm p-6 rounded-md shadow-md"
-        >
-          <div className="text-white text-center flex flex-col gap-3">
-            <h3 className="text-3xl font-bold text-white">Nhập mã OTP</h3>
-            <p className="text-sm text-gray-300">
-              Vui lòng nhập mã OTP gồm 6 chữ số đã được gửi đến email{" "}
-              <b>{email}</b>.
-            </p>
-            {/* Input OTP */}
-            <div className="flex justify-center space-x-4">
-              {otp.map((num, index) => (
-                <input
-                  key={index}
-                  id={`otp-${index}`}
-                  type="text"
-                  className="bg-zinc-900 border border-zinc-700 w-12 h-12 text-center text-lg font-bold rounded-lg outline-none text-black"
-                  value={num}
-                  onChange={(e) => handleOtpChange(index, e.target.value)}
-                  maxLength={1}
-                  onPaste={index === 0 ? handlePaste : undefined} // Chỉ lắng nghe paste ở ô đầu tiên
-                />
-              ))}
-            </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-            {/* Nút xác nhận OTP */}
-            <Button
-              onClick={handleVerifyOTP}
-              className="w-full font-bold bg-black text-white py-2 rounded border border-gray-500 hover:bg-gray-800 transition duration-150 ease-in-out mt-3"
-            >
-              Xác nhận OTP
-            </Button>
-            {/* Gửi lại mã OTP */}
-            <div className="text-center text-sm mt-3">
-              <p>
-                Bạn chưa nhận được mã OTP?
-                {isResendDisabled ? (
-                  <span className="ml-2 text-gray-400">
-                    Gửi lại sau {timer}s
-                  </span>
-                ) : (
-                  <button
-                    onClick={handleResendOTP}
-                    className="ml-2 font-semibold text-gray-200 cursor-pointer hover:text-gray-400"
+    <Suspense fallback={<div>Loading...</div>}>
+      <div>
+        <div className="relative min-h-screen w-full bg-[url('https://png.pngtree.com/background/20230611/original/pngtree-rain-storm-and-a-chess-board-picture-image_3129264.jpg')] bg-cover bg-center bg-repeat flex items-center justify-center">
+          <div className="absolute inset-0 bg-gray-900/60" />
+          <div
+            style={{ marginTop: "80px" }}
+            className="relative w-full max-w-screen-sm mx-auto border border-white bg-transparent bg-opacity-90 backdrop-blur-sm p-6 rounded-md shadow-md"
+          >
+            <div className="text-white text-center flex flex-col gap-3">
+              <h3 className="text-3xl font-bold text-white">Nhập mã OTP</h3>
+              <p className="text-sm text-gray-300">
+                Vui lòng nhập mã OTP gồm 6 chữ số đã được gửi đến email{" "}
+                <b>{email}</b>.
+              </p>
+              {/* Input OTP */}
+              <div className="flex justify-center space-x-4">
+                {otp.map((num, index) => (
+                  <input
+                    key={index}
+                    id={`otp-${index}`}
+                    type="text"
+                    className="bg-zinc-900 border border-zinc-700 w-12 h-12 text-center text-lg font-bold rounded-lg outline-none text-black"
+                    value={num}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    maxLength={1}
+                    onPaste={index === 0 ? handlePaste : undefined} // Chỉ lắng nghe paste ở ô đầu tiên
+                  />
+                ))}
+              </div>
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {/* Nút xác nhận OTP */}
+              <Button
+                onClick={handleVerifyOTP}
+                className="w-full font-bold bg-black text-white py-2 rounded border border-gray-500 hover:bg-gray-800 transition duration-150 ease-in-out mt-3"
+              >
+                Xác nhận OTP
+              </Button>
+              {/* Gửi lại mã OTP */}
+              <div className="text-center text-sm mt-3">
+                <p>
+                  Bạn chưa nhận được mã OTP?
+                  {isResendDisabled ? (
+                    <span className="ml-2 text-gray-400">
+                      Gửi lại sau {timer}s
+                    </span>
+                  ) : (
+                    <button
+                      onClick={handleResendOTP}
+                      className="ml-2 font-semibold text-gray-200 cursor-pointer hover:text-gray-400"
+                    >
+                      Gửi lại mã
+                    </button>
+                  )}
+                </p>
+                <p className="mt-2">
+                  Bạn đã có tài khoản?
+                  <Link
+                    href="/login"
+                    className="font-semibold text-gray-200 cursor-pointer hover:text-gray-400 ml-1"
                   >
-                    Gửi lại mã
-                  </button>
-                )}
-              </p>
-              <p className="mt-2">
-                Bạn đã có tài khoản?
-                <Link
-                  href="/login"
-                  className="font-semibold text-gray-200 cursor-pointer hover:text-gray-400 ml-1"
-                >
-                  Đăng nhập ngay
-                </Link>
-              </p>
+                    Đăng nhập ngay
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 }
