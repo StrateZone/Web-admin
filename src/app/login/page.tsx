@@ -1,9 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { User } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@material-tailwind/react";
-import { Input } from "@material-tailwind/react";
+import { Button, Input } from "@material-tailwind/react";
 
 import axios from "axios"; // Import axios
 
@@ -12,7 +9,6 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [loading, setLoading] = useState(false);
   const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
   const router = useRouter();
@@ -40,11 +36,19 @@ export default function LoginPage() {
           `https://backend-production-5bc5.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email)}`,
         );
 
-        if (response.status === 200) {
-          router.push(`/otp_verification?email=${encodeURIComponent(email)}`);
+        console.log("API Response:", response.data); // Kiểm tra dữ liệu trả về
+
+        // Kiểm tra nếu API trả về lỗi dù HTTP status vẫn là 200
+        if (
+          response.data?.success === false ||
+          response.data?.statusCode === 404
+        ) {
+          return; // Dừng lại nếu tài khoản không tồn tại
         }
+
+        router.push(`/otp_verification?email=${encodeURIComponent(email)}`);
       } catch (error) {
-        console.error("Lỗi khi gửi OTP:");
+        console.log(error);
       }
     }
   };
@@ -70,7 +74,6 @@ export default function LoginPage() {
               <div className="relative w-full">
                 <Input
                   color="white"
-                  variant="outlined" // Thay đổi từ "standard" -> "outlined"
                   size="lg"
                   className="text-white"
                   maxLength={50}
@@ -93,24 +96,12 @@ export default function LoginPage() {
             </div>
             <div className="flex flex-col gap-3 mt-4">
               <Button
-                className="w-full font-bold bg-black text-white py-3 rounded border-[0.5px]"
+                className="w-full font-bold py-3 rounded border-[0.5px]"
                 onClick={handleLogin}
-                disabled={loading}
               >
-                {loading ? "Đang gửi OTP..." : "Đăng nhập"}
+                Đăng Nhập
               </Button>
             </div>
-            {/* <div className="text-center text-sm mt-4">
-              <p>
-                Bạn chưa có tài khoản?{" "}
-                <Link
-                  href={`/register`}
-                  className="font-semibold text-gray-200 cursor-pointer hover:text-gray-400"
-                >
-                  Đăng ký miễn phí
-                </Link>
-              </p>
-            </div> */}
           </div>
         </div>
       </div>
