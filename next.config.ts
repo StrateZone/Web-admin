@@ -1,18 +1,14 @@
-import createNextIntlPlugin from "next-intl/plugin";
-
-const withNextIntl = createNextIntlPlugin();
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["cdn.shopify.com", "phatdatbinhthoi.com.vn", "lienhiepthanh.com"], // Thêm tất cả các domain cần thiết
+    domains: ["cdn.shopify.com", "phatdatbinhthoi.com.vn", "lienhiepthanh.com"],
   },
   eslint: {
-    ignoreDuringBuilds: true, // Bỏ qua lỗi ESLint khi build
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true, // Chỉ dùng tạm thời, sau đó sửa lỗi
+    ignoreBuildErrors: true,
   },
 };
 
-module.exports = withNextIntl(nextConfig);
+module.exports = nextConfig;
