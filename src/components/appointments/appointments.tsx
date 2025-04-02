@@ -109,6 +109,8 @@ export default function Appointments() {
     unpaid: "gray",
     expired: "purple",
     refunded: "orange",
+    imcompleted: "darkgray",
+    incoming: "indigo",
   };
 
   return (
@@ -119,7 +121,7 @@ export default function Appointments() {
             Danh sách Lịch Hẹn
           </Typography>
         </CardHeader>
-        <CardBody className="px-0 pt-0 pb-2 max-h-[70vh] min-h-[350px] overflow-y-auto">
+        <CardBody className="px-0 pt-0 pb-2 max-h-[70vh] min-h-[500px] overflow-y-auto">
           <div className="w-72 p-4">
             <Select
               label="Lọc trạng thái"
@@ -135,6 +137,8 @@ export default function Appointments() {
               <Option value="unpaid">Chưa thanh toán</Option>
               <Option value="expired">Hết hạn</Option>
               <Option value="refunded">Đã hoàn tiền</Option>
+              <Option value="imcompleted">Chưa hoàn tất</Option>
+              <Option value="incoming">Sắp diễn ra</Option>
             </Select>
           </div>
           <table className="w-full min-w-full table-auto max-h-[500px] overflow-auto">
@@ -163,80 +167,93 @@ export default function Appointments() {
               </tr>
             </thead>
             <tbody>
-              {appointments.map((appointment, key) => {
-                const className = `py-3 px-5 ${
-                  key === appointments.length - 1
-                    ? ""
-                    : "border-b border-blue-gray-50"
-                }`;
+              {Array.isArray(appointments) && appointments.length > 0 ? (
+                appointments.map((appointment, key) => {
+                  const className = `py-3 px-5 ${
+                    key === appointments.length - 1
+                      ? ""
+                      : "border-b border-blue-gray-50"
+                  }`;
 
-                return (
-                  <tr key={appointment.appointmentId}>
-                    <td className={className}>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-semibold"
-                      >
-                        {appointment.appointmentId}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {appointment.user.username}
-                      </Typography>
-                      <Typography className="text-xs font-normal text-blue-gray-500">
-                        {appointment.user.fullName ?? ""}
-                      </Typography>
-                      <Typography className="text-xs font-normal text-blue-gray-500">
-                        {appointment.user.email ?? ""}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-semibold"
-                      >
-                        {appointment.totalPrice.toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        })}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Chip
-                        variant="gradient"
-                        color={
-                          (statusColors[appointment.status] as color) ||
-                          "blue-gray"
-                        }
-                        value={appointment.status}
-                        className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                      />
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {new Date(appointment.createdAt).toLocaleString()}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Button
-                        variant="gradient"
-                        color="red"
-                        onClick={() =>
-                          handleCancelClick(appointment.appointmentId)
-                        }
-                        disabled={
-                          !["pending", "confirmed"].includes(appointment.status)
-                        }
-                      >
-                        Hủy
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr key={appointment.appointmentId}>
+                      <td className={className}>
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-semibold"
+                        >
+                          {appointment.appointmentId}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {appointment.user.username}
+                        </Typography>
+                        <Typography className="text-xs font-normal text-blue-gray-500">
+                          {appointment.user.fullName ?? ""}
+                        </Typography>
+                        <Typography className="text-xs font-normal text-blue-gray-500">
+                          {appointment.user.email ?? ""}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-semibold"
+                        >
+                          {appointment.totalPrice.toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          })}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Chip
+                          variant="gradient"
+                          color={
+                            (statusColors[appointment.status] as color) ||
+                            "blue-gray"
+                          }
+                          value={appointment.status}
+                          className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                        />
+                      </td>
+                      <td className={className}>
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {new Date(appointment.createdAt).toLocaleString()}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Button
+                          variant="gradient"
+                          color="red"
+                          onClick={() =>
+                            handleCancelClick(appointment.appointmentId)
+                          }
+                          disabled={
+                            !["pending", "confirmed"].includes(
+                              appointment.status,
+                            )
+                          }
+                        >
+                          Hủy
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="py-4 text-center text-blue-gray-500"
+                  >
+                    Không có cuộc hẹn nào.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </CardBody>
