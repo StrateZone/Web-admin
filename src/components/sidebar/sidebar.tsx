@@ -1,5 +1,8 @@
 import React from "react";
 import { MdLogout } from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
+import { CiCalendar } from "react-icons/ci";
+import { BsFileEarmarkPost } from "react-icons/bs";
 
 type SidebarProps = {
   activeTab: string;
@@ -9,7 +12,19 @@ type SidebarProps = {
 export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const MENU_ITEMS = [
     {
-      title: "Profile",
+      title: "Dashboard",
+      icon: () => <MdDashboard />,
+    },
+    {
+      title: "Cuộc Hẹn",
+      icon: () => <CiCalendar />,
+    },
+    {
+      title: "Bài Viết",
+      icon: () => <BsFileEarmarkPost />,
+    },
+    {
+      title: "Hồ Sơ",
       icon: () => (
         <svg
           xmlns="http://www.w3.org/2000/svg"

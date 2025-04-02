@@ -32,7 +32,7 @@ export default function LoginPage() {
       //xu ly ben trong luon ko ca`n tach ra
       try {
         const response = await axios.post(
-          `https://backend-production-5bc5.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email)}`
+          `https://backend-production-5bc5.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email)}`,
         );
 
         console.log("API Response:", response.data); // Kiểm tra dữ liệu trả về
