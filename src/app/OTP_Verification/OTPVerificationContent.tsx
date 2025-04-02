@@ -12,7 +12,7 @@ export default function OTPVerificationContent() {
   const email = searchParams.get("email");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(300);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const inputsRef = useRef<HTMLInputElement[]>([]);
 
@@ -58,7 +58,7 @@ export default function OTPVerificationContent() {
       const response = await axios.post(
         "https://backend-production-5bc5.up.railway.app/api/auth/verify-otp",
         { email, otp: otpCode },
-        { headers: { "Content-Type": "application/json" } }
+        { headers: { "Content-Type": "application/json" } },
       );
 
       if (response.data.success && response.data.data) {
@@ -75,15 +75,21 @@ export default function OTPVerificationContent() {
     }
   };
 
+  function formatTime(seconds: number) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, "0")}`;
+  }
+
   const handleResendOTP = async () => {
     setIsResendDisabled(true);
-    setTimer(30);
+    setTimer(300);
 
     try {
       await axios.post(
         `https://backend-production-5bc5.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email || "")}`,
         {},
-        { headers: { "Content-Type": "application/json" } }
+        { headers: { "Content-Type": "application/json" } },
       );
     } catch (error) {
       setError("Không thể gửi lại mã OTP!");
@@ -127,7 +133,7 @@ export default function OTPVerificationContent() {
                 key={index}
                 ref={(el) => el && (inputsRef.current[index] = el)}
                 type="text"
-                className="bg-zinc-900 border border-zinc-700 w-12 h-12 text-center text-lg font-bold rounded-lg outline-none text-white"
+                className="bg-zinc-900 border border-zinc-700 w-12 h-12 text-center text-lg font-bold rounded-lg outline-none text-black"
                 value={num}
                 onChange={(e) => handleOtpChange(index, e.target.value)}
                 maxLength={1}
@@ -148,7 +154,9 @@ export default function OTPVerificationContent() {
           <div className="text-center text-sm mt-3">
             <p>
               {isResendDisabled ? (
-                <span className="text-gray-400">Gửi lại sau {timer}s</span>
+                <span className="text-gray-400">
+                  Gửi lại sau {formatTime(timer)}
+                </span>
               ) : (
                 <button
                   onClick={handleResendOTP}
@@ -160,7 +168,7 @@ export default function OTPVerificationContent() {
             </p>
             <p className="mt-2">
               <Link
-                href="/login"
+                href="/Login"
                 className="font-semibold text-gray-200 hover:text-gray-400"
               >
                 ← Quay lại đăng nhập
