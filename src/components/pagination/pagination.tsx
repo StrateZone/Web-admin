@@ -77,32 +77,33 @@ export function DefaultPagination({
 
         {/* Danh sách trang */}
         <div className="flex items-center gap-1">
-          {/* Trang đầu tiên */}
-          {currentPage > 3 && (
+          {/* Hiển thị trang đầu tiên nếu không có trong getVisiblePages */}
+          {currentPage > 3 && !getVisiblePages().includes(1) && (
             <>
               <IconButton {...getItemProps(1)}>1</IconButton>
               {currentPage > 4 && <span className="mx-1">...</span>}
             </>
           )}
 
-          {/* Các trang trong khoảng */}
+          {/* Hiển thị các trang trong khoảng */}
           {getVisiblePages().map((page) => (
             <IconButton key={page} {...getItemProps(page)}>
               {page}
             </IconButton>
           ))}
 
-          {/* Trang cuối cùng */}
-          {currentPage < totalPages - 2 && (
-            <>
-              {currentPage < totalPages - 3 && (
-                <span className="mx-1">...</span>
-              )}
-              <IconButton {...getItemProps(totalPages)}>
-                {totalPages}
-              </IconButton>
-            </>
-          )}
+          {/* Hiển thị trang cuối nếu không có trong getVisiblePages */}
+          {currentPage < totalPages - 2 &&
+            !getVisiblePages().includes(totalPages) && (
+              <>
+                {currentPage < totalPages - 3 && (
+                  <span className="mx-1">...</span>
+                )}
+                <IconButton {...getItemProps(totalPages)}>
+                  {totalPages}
+                </IconButton>
+              </>
+            )}
         </div>
 
         {/* Nút Next */}
