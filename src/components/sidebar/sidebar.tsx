@@ -1,8 +1,12 @@
+"use client";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { MdLogout } from "react-icons/md";
 import { MdDashboard } from "react-icons/md";
 import { CiCalendar } from "react-icons/ci";
 import { BsFileEarmarkPost } from "react-icons/bs";
+import { GrSystem, GrTransaction } from "react-icons/gr";
+import { FaCheck } from "react-icons/fa";
 
 type SidebarProps = {
   activeTab: string;
@@ -10,36 +14,49 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+  const router = useRouter();
   const MENU_ITEMS = [
+    // {
+    //   title: "Dashboard",
+    //   icon: () => <MdDashboard />,
+    // },
     {
-      title: "Dashboard",
-      icon: () => <MdDashboard />,
+      title: "Các Giao Dịch",
+      icon: () => <GrTransaction />,
+    },
+    {
+      title: "Hệ Thống",
+      icon: () => <GrSystem />,
     },
     {
       title: "Cuộc Hẹn",
       icon: () => <CiCalendar />,
     },
     {
-      title: "Bài Viết",
-      icon: () => <BsFileEarmarkPost />,
+      title: "Điểm Danh",
+      icon: () => <FaCheck />,
     },
-    {
-      title: "Hồ Sơ",
-      icon: () => (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            fillRule="evenodd"
-            d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
-    },
+    // {
+    //   title: "Bài Viết",
+    //   icon: () => <BsFileEarmarkPost />,
+    // },
+    // {
+    //   title: "Hồ Sơ",
+    //   icon: () => (
+    //     <svg
+    //       xmlns="http://www.w3.org/2000/svg"
+    //       viewBox="0 0 24 24"
+    //       fill="currentColor"
+    //       className="w-5 h-5"
+    //     >
+    //       <path
+    //         fillRule="evenodd"
+    //         d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+    //         clipRule="evenodd"
+    //       />
+    //     </svg>
+    //   ),
+    // },
     {
       title: "Logout",
       icon: () => <MdLogout />,
@@ -59,13 +76,24 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
           <div
             key={index}
             role="button"
-            onClick={() => setActiveTab(item.title)}
+            onClick={() => {
+              if (item.title === "Logout") {
+                localStorage.removeItem("authData");
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                router.push("/Login"); // redirect về trang login
+              } else {
+                setActiveTab(item.title);
+              }
+            }}
             className={`flex items-center p-3 transition-all rounded-lg hover:bg-blue-gray-50 hover:text-blue-gray-900 cursor-pointer ${
               activeTab === item.title ? "bg-black text-white" : ""
             }`}
           >
             <div
-              className={`grid mr-4 text-${activeTab === item.title ? "white" : "black"} place-items-center ${activeTab === item.title ? "" : ""}`}
+              className={`grid mr-4 text-${
+                activeTab === item.title ? "white" : "black"
+              } place-items-center`}
             >
               {item.icon()}
             </div>

@@ -56,7 +56,7 @@ export default function OTPVerificationContent() {
 
     try {
       const response = await axios.post(
-        "https://backend-production-5bc5.up.railway.app/api/auth/verify-otp",
+        "https://backend-production-ac5e.up.railway.app/api/auth/verify-otp",
         { email, otp: otpCode },
         { headers: { "Content-Type": "application/json" } },
       );
@@ -87,7 +87,7 @@ export default function OTPVerificationContent() {
 
     try {
       await axios.post(
-        `https://backend-production-5bc5.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email || "")}`,
+        `https://backend-production-ac5e.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email || "")}`,
         {},
         { headers: { "Content-Type": "application/json" } },
       );
