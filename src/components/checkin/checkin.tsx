@@ -8,44 +8,44 @@ import {
   Select,
   Typography,
 } from "@material-tailwind/react";
+import { color } from "@material-tailwind/react/types/components/alert";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
+import { FiChevronDown, FiChevronRight } from "react-icons/fi";
+import { GoArrowDownRight, GoArrowUpRight } from "react-icons/go";
 import { DefaultPagination } from "../pagination/pagination";
 import ConfirmPopup from "../confirm_popup/confirm_popup";
-import { color } from "@material-tailwind/react/types/components/alert";
-import { GoArrowDownRight, GoArrowUpRight } from "react-icons/go";
-import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { config } from "../../../config";
 
-export default function Appointments() {
-  type AppointmentData = {
-    appointmentId: number;
-    user: {
-      userId: number;
-      username: string;
-      fullName?: string;
-      email?: string;
-    };
-    totalPrice: number;
-    status: string;
-    createdAt: string;
-    tablesAppointments: Array<{
-      id: number;
-      tableId: number;
-      status: string;
-      scheduleTime: string;
-      endTime: string;
-      durationInHours: number;
-      price: number;
-      table: {
-        tableId: number;
-        roomName: string;
-        roomType: string;
-        roomDescription: string;
-      };
-    }>;
+type AppointmentData = {
+  appointmentId: number;
+  user: {
+    userId: number;
+    username: string;
+    fullName?: string;
+    email?: string;
   };
+  totalPrice: number;
+  status: string;
+  createdAt: string;
+  tablesAppointments: Array<{
+    id: number;
+    tableId: number;
+    status: string;
+    scheduleTime: string;
+    endTime: string;
+    durationInHours: number;
+    price: number;
+    table: {
+      tableId: number;
+      roomName: string;
+      roomType: string;
+      roomDescription: string;
+    };
+  }>;
+};
 
+export default function Checkin() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,18 +110,21 @@ export default function Appointments() {
 
     setLoading(true);
     try {
-      const response = await axios.get(`${backendApi}/appointments/all/admin`, {
-        signal: controller.signal,
-        params: {
-          "page-number": currentPage,
-          "page-size": 10,
-          ...(appointmentStatus && { Status: appointmentStatus }),
-          ...(orderBy && { "order-by": orderBy }),
-          ...(debouncedSearchValue && {
-            SearchValue: encodeURIComponent(debouncedSearchValue),
-          }),
+      const response = await axios.get(
+        `${backendApi}/appointments/all/checkin`,
+        {
+          signal: controller.signal,
+          params: {
+            "page-number": currentPage,
+            "page-size": 10,
+            ...(appointmentStatus && { Status: appointmentStatus }),
+            ...(orderBy && { "order-by": orderBy }),
+            ...(debouncedSearchValue && {
+              SearchValue: encodeURIComponent(debouncedSearchValue),
+            }),
+          },
         },
-      });
+      );
 
       // Chỉ xử lý nếu là request mới nhất
       if (requestId === latestRequestId) {
@@ -150,56 +153,37 @@ export default function Appointments() {
   const [selectedTableAppointmentId, setSelectedTableAppointmentId] = useState<
     number | null
   >(null);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const [selectedTableInfo, setSelectedTableInfo] = useState<{
-    roomName: string;
-    roomType: string;
-    scheduleTime: string;
-    endTime: string;
-    date: string;
-    price: number;
-  } | null>(null);
+  const [selectedTableAppointmentUserId, setSelectedTableAppointmentUserId] =
+    useState<number | null>(null);
 
-  // Mở popup xác nhận hủy
-  const handleCancelClick = (
-    tableAppointmentId: number,
-    userId: number,
-    tableInfo: {
-      roomName: string;
-      roomType: string;
-      scheduleTime: string;
-      endTime: string;
-      date: string;
-      price: number;
-    },
-  ) => {
+  // Mở popup xác nhận điểm danh
+  const handleCheckinClick = (tableAppointmentId: number, userId: number) => {
     setSelectedTableAppointmentId(tableAppointmentId);
-    setSelectedUserId(userId);
-    setSelectedTableInfo(tableInfo);
+    setSelectedTableAppointmentUserId(userId);
     setShowPopup(true);
   };
 
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  // Xác nhận hủy lịch hẹn
-  const handleConfirmCancel = async () => {
-    if (!selectedTableAppointmentId || !selectedUserId) return;
+  // Xác nhận điểm danh lịch hẹn
+  const handleConfirmCheckin = async () => {
+    if (!selectedTableAppointmentId || !selectedTableAppointmentUserId) return;
 
     try {
       await axios.put(
-        `${backendApi}/appointments/cancel/admin?tableAppointmentId=${selectedTableAppointmentId}&userId=${selectedUserId}`,
+        `${backendApi}/tables-appointment/check-in/${selectedTableAppointmentId}/users/${selectedTableAppointmentUserId}`,
       );
 
       setShowPopup(false);
       setSelectedTableAppointmentId(null);
       setShowSuccessPopup(true);
 
-      // Gọi lại API để làm mới danh sách
       fetchAppointments();
     } catch (error) {
       console.error("Lỗi hủy lịch:", error);
       alert("Hủy lịch hẹn thất bại!");
     }
   };
+
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const statusColors: Record<string, string> = {
     pending: "yellow",
@@ -334,56 +318,54 @@ export default function Appointments() {
                 return (
                   <Card key={appointment.appointmentId} className="mb-4 shadow">
                     <CardBody>
-                      {/* Header chính của appointment */}
-                      <div className="flex flex-col gap-2">
-                        <div
-                          className="flex items-start justify-between cursor-pointer hover:bg-gray-50 rounded-md p-2"
-                          onClick={() => toggleRow(appointment.appointmentId)}
-                        >
-                          <div className="flex gap-4 items-start">
-                            <span className="text-lg mt-1">
-                              {isExpanded ? (
-                                <FiChevronDown />
-                              ) : (
-                                <FiChevronRight />
-                              )}
-                            </span>
-                            <div>
-                              <Typography variant="small" className="font-bold">
-                                ID: {appointment.appointmentId}
-                              </Typography>
-                              <Typography className="text-sm text-blue-gray-600">
-                                {appointment.user.fullName} (
-                                {appointment.user.username})
-                              </Typography>
-                              <Typography className="text-xs text-blue-gray-400">
-                                {appointment.user.email}
-                              </Typography>
-                            </div>
-                          </div>
-
-                          <div className="text-right space-y-1">
-                            <Typography className="text-sm font-semibold text-blue-gray-700">
-                              {appointment.totalPrice.toLocaleString("vi-VN", {
-                                style: "currency",
-                                currency: "VND",
-                              })}
+                      {/* Row chính */}
+                      <div
+                        className="flex items-start justify-between cursor-pointer hover:bg-gray-50 rounded-md p-2"
+                        onClick={() => toggleRow(appointment.appointmentId)}
+                      >
+                        <div className="flex gap-4 items-start">
+                          <span className="text-lg mt-1">
+                            {isExpanded ? (
+                              <FiChevronDown />
+                            ) : (
+                              <FiChevronRight />
+                            )}
+                          </span>
+                          <div>
+                            <Typography variant="small" className="font-bold">
+                              ID: {appointment.appointmentId}
                             </Typography>
-                            <Chip
-                              variant="gradient"
-                              color={
-                                (statusColors[appointment.status] as color) ||
-                                "gray"
-                              }
-                              value={appointment.status}
-                              className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                            />
+                            <Typography className="text-sm text-blue-gray-600">
+                              {appointment.user.fullName} (
+                              {appointment.user.username})
+                            </Typography>
                             <Typography className="text-xs text-blue-gray-400">
-                              {new Date(appointment.createdAt).toLocaleString(
-                                "vi-VN",
-                              )}
+                              {appointment.user.email}
                             </Typography>
                           </div>
+                        </div>
+
+                        <div className="text-right space-y-1">
+                          <Typography className="text-sm font-semibold text-blue-gray-700">
+                            {appointment.totalPrice.toLocaleString("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            })}
+                          </Typography>
+                          <Chip
+                            variant="gradient"
+                            color={
+                              (statusColors[appointment.status] as color) ||
+                              "gray"
+                            }
+                            value={appointment.status}
+                            className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                          />
+                          <Typography className="text-xs text-blue-gray-400">
+                            {new Date(appointment.createdAt).toLocaleString(
+                              "vi-VN",
+                            )}
+                          </Typography>
                         </div>
                       </div>
 
@@ -412,7 +394,7 @@ export default function Appointments() {
                                     <th className="py-1 px-2">Ngày</th>
                                     <th className="py-1 px-2">Giá</th>
                                     <th className="py-1 px-2">Trạng thái</th>
-                                    <th className="py-1 px-2">Hành Động</th>
+                                    <th className="py-1 px-2">Hành động</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -460,47 +442,26 @@ export default function Appointments() {
                                             variant="gradient"
                                             color="red"
                                             onClick={() =>
-                                              handleCancelClick(
+                                              handleCheckinClick(
                                                 tableApp.id,
                                                 appointment.user.userId,
-                                                {
-                                                  roomName:
-                                                    tableApp.table.roomName,
-                                                  roomType:
-                                                    tableApp.table.roomType,
-                                                  scheduleTime: new Date(
-                                                    tableApp.scheduleTime,
-                                                  ).toLocaleTimeString(
-                                                    "vi-VN",
-                                                    {
-                                                      hour: "2-digit",
-                                                      minute: "2-digit",
-                                                    },
-                                                  ),
-                                                  endTime: new Date(
-                                                    tableApp.endTime,
-                                                  ).toLocaleTimeString(
-                                                    "vi-VN",
-                                                    {
-                                                      hour: "2-digit",
-                                                      minute: "2-digit",
-                                                    },
-                                                  ),
-                                                  date: new Date(
-                                                    tableApp.scheduleTime,
-                                                  ).toLocaleDateString("vi-VN"),
-                                                  price: tableApp.price,
-                                                },
                                               )
                                             }
                                             disabled={
-                                              ![
-                                                "pending",
-                                                "confirmed",
-                                              ].includes(tableApp.status)
+                                              !(
+                                                tableApp.status ===
+                                                  "incoming" &&
+                                                new Date() >=
+                                                  new Date(
+                                                    new Date(
+                                                      tableApp.scheduleTime,
+                                                    ).getTime() -
+                                                      5 * 60 * 1000,
+                                                  )
+                                              )
                                             }
                                           >
-                                            Hủy
+                                            Điểm danh
                                           </Button>
                                         </td>
                                       </tr>
@@ -530,17 +491,9 @@ export default function Appointments() {
           <ConfirmPopup
             isOpen={showPopup}
             onClose={() => setShowPopup(false)}
-            onConfirm={handleConfirmCancel}
-            title="Xác nhận hủy lịch hẹn"
-            message={
-              selectedTableInfo
-                ? `Bạn có chắc chắn muốn hủy lịch hẹn:\n
-                - Phòng: ${selectedTableInfo.roomName} (${selectedTableInfo.roomType})\n
-                - Ngày: ${selectedTableInfo.date}\n
-                - Giờ: ${selectedTableInfo.scheduleTime} - ${selectedTableInfo.endTime}\n
-                - Giá: ${selectedTableInfo.price.toLocaleString()} đ`
-                : "Bạn có chắc chắn muốn hủy lịch hẹn này không?"
-            }
+            onConfirm={handleConfirmCheckin}
+            title="Xác nhận điểm danh"
+            message="Bạn có chắc chắn muốn điểm danh lịch hẹn này không?"
             confirmText="Đồng ý"
           />
 
@@ -549,8 +502,8 @@ export default function Appointments() {
             isOpen={showSuccessPopup}
             onClose={() => setShowSuccessPopup(false)}
             onConfirm={() => setShowSuccessPopup(false)}
-            title="Hủy lịch hẹn thành công"
-            message="Lịch hẹn của bạn đã được hủy thành công."
+            title="Điểm danh lịch hẹn thành công"
+            message="Lịch hẹn đã được điểm danh thành công."
             confirmText="OK"
           />
         </Card>

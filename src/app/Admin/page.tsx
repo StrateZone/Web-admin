@@ -2,16 +2,38 @@
 
 import Sidebar from "@/components/sidebar/sidebar";
 import TabContent from "@/components/sidebar/tab_content";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 import { useState } from "react";
 
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState("Profile");
+  const [activeTab, setActiveTab] = useState("Cuộc Hẹn");
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const authData = JSON.parse(localStorage.getItem("authData") || "{}");
+    const userRole = authData.userRole;
+
+    if (userRole !== "Admin") {
+      router.replace("/unauthorized"); // vẫn đúng với App Router
+    } else {
+      setIsAuthorized(true);
+    }
+  }, []);
+
+  if (!isAuthorized) return null;
 
   return (
-    <div className="flex">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <TabContent activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="flex h-screen overflow-hidden">
+      <div className="w-1/5 h-full">
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      </div>
+      <div className="w-full h-full overflow-y-auto flex flex-col">
+        <div className="flex-grow">
+          <TabContent activeTab={activeTab} setActiveTab={setActiveTab} />
+        </div>
+      </div>
     </div>
   );
 };
