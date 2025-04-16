@@ -25,14 +25,25 @@ type Thread = {
   }[];
 };
 
+type Tag = {
+  tagId: number;
+  tagName: string;
+  status: string;
+};
+
 export default function Posts() {
   const [posts, setPosts] = useState<Thread[]>([]);
+  const [threadTags, setThreadTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"pending" | "all">("all");
+  const authData =
+    typeof window !== "undefined" ? localStorage.getItem("authData") : null;
+  const userRole = authData ? JSON.parse(authData)?.userRole : null;
+  const isAdmin = userRole === "Admin";
 
   const router = useRouter();
   const backendApi = config.BACKEND_API;
@@ -94,6 +105,50 @@ export default function Posts() {
       }
     }
   }, [backendApi, activeTab, currentPage]);
+
+  const [tagLoadingMap, setTagLoadingMap] = useState<{
+    [key: number]: boolean;
+  }>({});
+
+  const setTagLoading = (tagId: number, isLoading: boolean) => {
+    setTagLoadingMap((prev) => ({ ...prev, [tagId]: isLoading }));
+  };
+
+  const fetchTags = async () => {
+    try {
+      const response = await axios.get(`${backendApi}/tags/thread`);
+      setThreadTags(response.data);
+    } catch (err) {
+      console.error("Lỗi khi tải tag:", err);
+    }
+  };
+  const handleHideTag = async (tagId: number) => {
+    setTagLoading(tagId, true);
+    try {
+      await axios.put(`${backendApi}/tags/admin/hide/${tagId}`);
+      fetchTags();
+    } catch (error) {
+      console.error("Lỗi khi ẩn tag:", error);
+    } finally {
+      setTagLoading(tagId, false);
+    }
+  };
+
+  const handleReactivateTag = async (tagId: number) => {
+    setTagLoading(tagId, true);
+    try {
+      await axios.put(`${backendApi}/tags/admin/activate/${tagId}`);
+      fetchTags();
+    } catch (error) {
+      console.error("Lỗi khi kích hoạt lại tag:", error);
+    } finally {
+      setTagLoading(tagId, false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTags();
+  }, []);
 
   useEffect(() => {
     fetchPosts();
@@ -199,17 +254,78 @@ export default function Posts() {
                   ))}
                 </div>
               )}
+              <div className="flex justify-center mt-4">
+                <DefaultPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
             </>
           )}
-          <div className="flex justify-center mt-4">
-            <DefaultPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </div>
         </CardBody>
       </Card>
+
+      {isAdmin && !selectedPostId && (
+        <Card className="mt-6 mb-4 p-4">
+          <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">
+            Các Tag dùng cho bài viết
+          </h3>
+          <ul className="space-y-2">
+            {threadTags.map((tag) => (
+              <li
+                key={tag.tagId}
+                className="flex items-center justify-between bg-gray-200 rounded-md px-3 py-2"
+              >
+                <div>
+                  <p className="text-sm font-medium text-black">
+                    {tag.tagName}
+                  </p>
+                  <span
+                    className={`inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full 
+              ${
+                tag.status === "active"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-200 text-red-700"
+              }
+            `}
+                  >
+                    {tag.status === "active" ? "Đang hoạt động" : "Đã ẩn"}
+                  </span>
+                </div>
+
+                {tag.status === "active" ? (
+                  <button
+                    onClick={() => handleHideTag(tag.tagId)}
+                    disabled={tagLoadingMap[tag.tagId]}
+                    className={`text-xs font-semibold py-1 px-3 rounded transition ${
+                      tagLoadingMap[tag.tagId]
+                        ? "bg-red-300 cursor-not-allowed"
+                        : "bg-red-500 hover:bg-red-600 text-white"
+                    }`}
+                  >
+                    {tagLoadingMap[tag.tagId] ? "Đang ẩn..." : "Ẩn"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleReactivateTag(tag.tagId)}
+                    disabled={tagLoadingMap[tag.tagId]}
+                    className={`text-xs font-semibold py-1 px-3 rounded transition ${
+                      tagLoadingMap[tag.tagId]
+                        ? "bg-green-300 cursor-not-allowed"
+                        : "bg-green-500 hover:bg-green-600 text-white"
+                    }`}
+                  >
+                    {tagLoadingMap[tag.tagId]
+                      ? "Đang kích hoạt..."
+                      : "Kích hoạt lại"}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
     </div>
   );
 }
