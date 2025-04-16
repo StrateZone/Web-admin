@@ -71,7 +71,7 @@ export default function LoginPage() {
                   Đăng nhập
                 </h3>
                 <p className="text-sm text-gray-300">
-                  Trang dành cho quản trị viên
+                  Trang dành cho ban quản trị
                 </p>
               </div>
               <div className="relative w-full">
