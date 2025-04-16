@@ -4,10 +4,12 @@ import { Button, Input } from "@material-tailwind/react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify"; // Import từ react-toastify
+import { config } from "../../../config";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  const backendApi = config.BACKEND_API;
 
   const router = useRouter();
 
@@ -32,7 +34,7 @@ export default function LoginPage() {
       //xu ly ben trong luon ko ca`n tach ra
       try {
         const response = await axios.post(
-          `https://backend-production-ac5e.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email)}`,
+          `${backendApi}/auth/send-otp?email=${encodeURIComponent(email)}`,
         );
 
         console.log("API Response:", response.data); // Kiểm tra dữ liệu trả về

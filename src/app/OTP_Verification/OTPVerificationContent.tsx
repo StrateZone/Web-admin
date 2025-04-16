@@ -5,6 +5,7 @@ import { Button } from "@material-tailwind/react";
 import axios from "axios";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
+import { config } from "../../../config";
 
 export default function OTPVerificationContent() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function OTPVerificationContent() {
   const [timer, setTimer] = useState(300);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const inputsRef = useRef<HTMLInputElement[]>([]);
+  const backendApi = config.BACKEND_API;
 
   useEffect(() => {
     if (!email) {
@@ -56,7 +58,7 @@ export default function OTPVerificationContent() {
 
     try {
       const response = await axios.post(
-        "https://backend-production-ac5e.up.railway.app/api/auth/verify-otp",
+        `${backendApi}/auth/verify-otp`,
         { email, otp: otpCode },
         { headers: { "Content-Type": "application/json" } },
       );
@@ -65,7 +67,13 @@ export default function OTPVerificationContent() {
         localStorage.setItem("authData", JSON.stringify(response.data.data));
         localStorage.setItem("accessToken", response.data.data.accessToken);
         localStorage.setItem("refreshToken", response.data.data.refreshToken);
-        router.push("/Admin");
+        if (response.data.data.userRole == "Admin") {
+          router.push("/Admin");
+        } else if (response.data.data.userRole == "Staff") {
+          router.push("/Staff");
+        } else {
+          router.push("/unauthorized");
+        }
       } else {
         setError(response.data.message || "OTP không hợp lệ!");
       }
@@ -87,7 +95,7 @@ export default function OTPVerificationContent() {
 
     try {
       await axios.post(
-        `https://backend-production-ac5e.up.railway.app/api/auth/send-otp?email=${encodeURIComponent(email || "")}`,
+        `${backendApi}/auth/send-otp?email=${encodeURIComponent(email || "")}`,
         {},
         { headers: { "Content-Type": "application/json" } },
       );
@@ -119,61 +127,66 @@ export default function OTPVerificationContent() {
 
   return (
     <div className="relative min-h-screen w-full bg-[url('https://png.pngtree.com/background/20230611/original/pngtree-rain-storm-and-a-chess-board-picture-image_3129264.jpg')] bg-cover bg-center">
+      {/* Overlay mờ */}
       <div className="absolute inset-0 bg-gray-900/60" />
-      <div className="relative w-full max-w-screen-sm mx-auto border border-white bg-transparent bg-opacity-90 backdrop-blur-sm p-6 rounded-md shadow-md mt-20">
-        <div className="text-white text-center flex flex-col gap-3">
-          <h3 className="text-3xl font-bold">Nhập mã OTP</h3>
-          <p className="text-sm text-gray-300">
-            Mã OTP đã gửi đến <b>{email}</b>
-          </p>
 
-          <div className="flex justify-center space-x-4">
-            {otp.map((num, index) => (
-              <input
-                key={index}
-                ref={(el) => el && (inputsRef.current[index] = el)}
-                type="text"
-                className="bg-zinc-900 border border-zinc-700 w-12 h-12 text-center text-lg font-bold rounded-lg outline-none text-black"
-                value={num}
-                onChange={(e) => handleOtpChange(index, e.target.value)}
-                maxLength={1}
-                onPaste={index === 0 ? handlePaste : undefined}
-              />
-            ))}
-          </div>
+      {/* Nội dung căn giữa */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen">
+        <div className="w-full max-w-screen-sm mx-auto border border-white bg-transparent bg-opacity-90 backdrop-blur-sm p-6 rounded-md shadow-md">
+          <div className="text-white text-center flex flex-col gap-3">
+            <h3 className="text-3xl font-bold">Nhập mã OTP</h3>
+            <p className="text-sm text-gray-300">
+              Mã OTP đã gửi đến <b>{email}</b>
+            </p>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+            <div className="flex justify-center space-x-4">
+              {otp.map((num, index) => (
+                <input
+                  key={index}
+                  ref={(el) => el && (inputsRef.current[index] = el)}
+                  type="text"
+                  className="bg-zinc-900 border border-zinc-700 w-12 h-12 text-center text-lg font-bold rounded-lg outline-none text-black"
+                  value={num}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  maxLength={1}
+                  onPaste={index === 0 ? handlePaste : undefined}
+                />
+              ))}
+            </div>
 
-          <Button
-            onClick={handleVerifyOTP}
-            className="w-full font-bold bg-black text-white py-2 rounded border border-gray-500 hover:bg-gray-800 transition duration-150 mt-3"
-          >
-            Xác nhận OTP
-          </Button>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <div className="text-center text-sm mt-3">
-            <p>
-              {isResendDisabled ? (
-                <span className="text-gray-400">
-                  Gửi lại sau {formatTime(timer)}
-                </span>
-              ) : (
-                <button
-                  onClick={handleResendOTP}
+            <Button
+              onClick={handleVerifyOTP}
+              className="w-full font-bold bg-black text-white py-2 rounded border border-gray-500 hover:bg-gray-800 transition duration-150 mt-3"
+            >
+              Xác nhận OTP
+            </Button>
+
+            <div className="text-center text-sm mt-3">
+              <p>
+                {isResendDisabled ? (
+                  <span className="text-gray-400">
+                    Gửi lại sau {formatTime(timer)}
+                  </span>
+                ) : (
+                  <button
+                    onClick={handleResendOTP}
+                    className="font-semibold text-gray-200 hover:text-gray-400"
+                  >
+                    Gửi lại mã
+                  </button>
+                )}
+              </p>
+              <p className="mt-2">
+                <Link
+                  href="/Login"
                   className="font-semibold text-gray-200 hover:text-gray-400"
                 >
-                  Gửi lại mã
-                </button>
-              )}
-            </p>
-            <p className="mt-2">
-              <Link
-                href="/Login"
-                className="font-semibold text-gray-200 hover:text-gray-400"
-              >
-                ← Quay lại đăng nhập
-              </Link>
-            </p>
+                  ← Quay lại đăng nhập
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
