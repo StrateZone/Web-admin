@@ -64,7 +64,7 @@ const getTransactionLabel = (
     case 2:
       return { label: "Hoàn tiền", color: "blue" };
     case 3:
-      return { label: "Chi phí", color: "amber" };
+      return { label: "Thanh toán", color: "amber" };
     default:
       return { label: "Không xác định", color: "gray" };
   }

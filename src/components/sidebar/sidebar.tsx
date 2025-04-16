@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { MdLogout } from "react-icons/md";
 import { MdDashboard } from "react-icons/md";
 import { CiCalendar } from "react-icons/ci";
@@ -15,6 +15,20 @@ type SidebarProps = {
 
 export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const router = useRouter();
+  const [userRole, setUserRole] = useState<string>("");
+
+  // Lấy role từ localStorage khi component mount
+  useEffect(() => {
+    const authData = localStorage.getItem("authData");
+    if (authData) {
+      try {
+        const parsedData = JSON.parse(authData);
+        setUserRole(parsedData?.userRole || "");
+      } catch (err) {
+        console.error("Lỗi phân tích authData:", err);
+      }
+    }
+  }, []);
   const MENU_ITEMS = [
     // {
     //   title: "Dashboard",
@@ -23,23 +37,28 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     {
       title: "Các Giao Dịch",
       icon: () => <GrTransaction />,
+      roles: ["Admin"],
     },
     {
       title: "Hệ Thống",
       icon: () => <GrSystem />,
+      roles: ["Admin"],
     },
     {
       title: "Cuộc Hẹn",
       icon: () => <CiCalendar />,
+      roles: ["Admin"],
     },
     {
       title: "Điểm Danh",
       icon: () => <FaCheck />,
+      roles: ["Staff", "Admin"],
     },
-    // {
-    //   title: "Bài Viết",
-    //   icon: () => <BsFileEarmarkPost />,
-    // },
+    {
+      title: "Bài Viết",
+      icon: () => <BsFileEarmarkPost />,
+      roles: ["Staff", "Admin"],
+    },
     // {
     //   title: "Hồ Sơ",
     //   icon: () => (
@@ -72,7 +91,9 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       </div>
 
       <nav className="flex flex-col gap-1 p-2 text-base font-normal text-blue-gray-700">
-        {MENU_ITEMS.map((item, index) => (
+        {MENU_ITEMS.filter(
+          (item) => !item.roles || item.roles.includes(userRole),
+        ).map((item, index) => (
           <div
             key={index}
             role="button"

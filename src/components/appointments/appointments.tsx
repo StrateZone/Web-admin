@@ -142,7 +142,7 @@ export default function Appointments() {
   };
 
   useEffect(() => {
-    console.log("Fetching appointments...");
+    //console.log("Fetching appointments...");
     fetchAppointments();
   }, [currentPage, appointmentStatus, orderBy, debouncedSearchValue]);
 
