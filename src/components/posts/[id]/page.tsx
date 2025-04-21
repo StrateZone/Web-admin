@@ -24,6 +24,7 @@ type Thread = {
     tag: {
       tagId: number;
       tagName: string;
+      tagColor: string;
     };
   }[];
   comments: {
@@ -167,7 +168,11 @@ export default function PostDetail({
           {post.threadsTags.map((item) => (
             <span
               key={item.tag.tagId}
-              className="px-3 py-1 text-sm bg-gray-800 text-white dark:bg-blue-900 dark:text-blue-300 rounded-full"
+              className="text-xs rounded-full px-2 py-0.5"
+              style={{
+                backgroundColor: item.tag.tagColor,
+                color: "#fff", // hoặc dùng màu tối hơn nếu tagColor là màu sáng
+              }}
             >
               {item.tag.tagName}
             </span>
@@ -238,6 +243,7 @@ export default function PostDetail({
       </div>
 
       {/* Nội dung bài viết */}
+      <span>Nội dung</span>
       <div
         className="prose dark:prose-invert max-w-none mb-6 px-4 py-6 bg-gray-50 text-gray-900 dark:text-white dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-in-out"
         dangerouslySetInnerHTML={{
@@ -247,12 +253,14 @@ export default function PostDetail({
         }}
       />
 
-      <Card>
-        <CardBody>
-          {/* Comment section được tách riêng */}
-          <CommentList comments={post.comments} />
-        </CardBody>
-      </Card>
+      {post.comments?.length > 0 && (
+        <Card>
+          <CardBody>
+            {/* Comment section được tách riêng */}
+            <CommentList comments={post.comments} />
+          </CardBody>
+        </Card>
+      )}
     </div>
   );
 }
