@@ -149,7 +149,8 @@ export default function Checkin() {
     fetchAppointments();
   }, [currentPage, appointmentStatus, orderBy, debouncedSearchValue]);
 
-  const [showPopup, setShowPopup] = useState(false);
+  const [showCheckinPopup, setShowCheckinPopup] = useState(false);
+  const [showCheckoutPopup, setShowCheckoutPopup] = useState(false);
   const [selectedTableAppointmentId, setSelectedTableAppointmentId] = useState<
     number | null
   >(null);
@@ -160,7 +161,7 @@ export default function Checkin() {
   const handleCheckinClick = (tableAppointmentId: number, userId: number) => {
     setSelectedTableAppointmentId(tableAppointmentId);
     setSelectedTableAppointmentUserId(userId);
-    setShowPopup(true);
+    setShowCheckinPopup(true);
   };
 
   // Xác nhận điểm danh lịch hẹn
@@ -172,9 +173,9 @@ export default function Checkin() {
         `${backendApi}/tables-appointment/check-in/${selectedTableAppointmentId}/users/${selectedTableAppointmentUserId}`,
       );
 
-      setShowPopup(false);
+      setShowCheckinPopup(false);
       setSelectedTableAppointmentId(null);
-      setShowSuccessPopup(true);
+      setShowCheckinSuccessPopup(true);
 
       fetchAppointments();
     } catch (error) {
@@ -183,7 +184,35 @@ export default function Checkin() {
     }
   };
 
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  // Mở popup xác nhận hoàn tất bàn
+  const handleCompleteClick = (tableAppointmentId: number, userId: number) => {
+    setSelectedTableAppointmentId(tableAppointmentId);
+    setSelectedTableAppointmentUserId(userId);
+    setShowCheckoutPopup(true);
+  };
+
+  const handleConfirmComplete = async () => {
+    if (!selectedTableAppointmentId || !selectedTableAppointmentUserId) return;
+
+    try {
+      await axios.put(
+        `${backendApi}/tables-appointment/check-out/${selectedTableAppointmentId}/users/${selectedTableAppointmentUserId}`,
+      );
+
+      setShowCheckoutPopup(false);
+      setSelectedTableAppointmentId(null);
+      setShowCheckoutSuccessPopup(true);
+
+      fetchAppointments();
+    } catch (error) {
+      console.error("Lỗi hoàn tất lịch:", error);
+      alert("Hoàn tất lịch hẹn thất bại!");
+    }
+  };
+
+  const [showCheckinSuccessPopup, setShowCheckinSuccessPopup] = useState(false);
+  const [showCheckoutSuccessPopup, setShowCheckoutSuccessPopup] =
+    useState(false);
 
   const statusColors: Record<string, string> = {
     pending: "yellow",
@@ -438,31 +467,46 @@ export default function Checkin() {
                                           {tableApp.status}
                                         </td>
                                         <td className="py-1 px-2">
-                                          <Button
-                                            variant="gradient"
-                                            color="red"
-                                            onClick={() =>
-                                              handleCheckinClick(
-                                                tableApp.id,
-                                                appointment.user.userId,
-                                              )
-                                            }
-                                            disabled={
-                                              !(
-                                                tableApp.status ===
-                                                  "incoming" &&
-                                                new Date() >=
-                                                  new Date(
+                                          {tableApp.status === "checked_in" ? (
+                                            <Button
+                                              variant="gradient"
+                                              color="green"
+                                              onClick={() =>
+                                                handleCompleteClick(
+                                                  tableApp.id,
+                                                  appointment.user.userId,
+                                                )
+                                              }
+                                            >
+                                              Hoàn tất
+                                            </Button>
+                                          ) : (
+                                            <Button
+                                              variant="gradient"
+                                              color="red"
+                                              onClick={() =>
+                                                handleCheckinClick(
+                                                  tableApp.id,
+                                                  appointment.user.userId,
+                                                )
+                                              }
+                                              disabled={
+                                                !(
+                                                  tableApp.status ===
+                                                    "incoming" &&
+                                                  new Date() >=
                                                     new Date(
-                                                      tableApp.scheduleTime,
-                                                    ).getTime() -
-                                                      5 * 60 * 1000,
-                                                  )
-                                              )
-                                            }
-                                          >
-                                            Điểm danh
-                                          </Button>
+                                                      new Date(
+                                                        tableApp.scheduleTime,
+                                                      ).getTime() -
+                                                        5 * 60 * 1000,
+                                                    )
+                                                )
+                                              }
+                                            >
+                                              Điểm danh
+                                            </Button>
+                                          )}
                                         </td>
                                       </tr>
                                     ),
@@ -487,23 +531,43 @@ export default function Checkin() {
             />
           </div>
 
-          {/* Popup xác nhận hủy */}
+          {/* Popup xác nhận điểm danh */}
           <ConfirmPopup
-            isOpen={showPopup}
-            onClose={() => setShowPopup(false)}
+            isOpen={showCheckinPopup}
+            onClose={() => setShowCheckinPopup(false)}
             onConfirm={handleConfirmCheckin}
             title="Xác nhận điểm danh"
             message="Bạn có chắc chắn muốn điểm danh lịch hẹn này không?"
             confirmText="Đồng ý"
           />
 
-          {/* popup hủy thành công */}
+          {/* popup điểm danh thành công */}
           <ConfirmPopup
-            isOpen={showSuccessPopup}
-            onClose={() => setShowSuccessPopup(false)}
-            onConfirm={() => setShowSuccessPopup(false)}
+            isOpen={showCheckinSuccessPopup}
+            onClose={() => setShowCheckinSuccessPopup(false)}
+            onConfirm={() => setShowCheckinSuccessPopup(false)}
             title="Điểm danh lịch hẹn thành công"
             message="Lịch hẹn đã được điểm danh thành công."
+            confirmText="OK"
+          />
+
+          {/* Popup xác nhận hoàn tất bàn */}
+          <ConfirmPopup
+            isOpen={showCheckoutPopup}
+            onClose={() => setShowCheckoutPopup(false)}
+            onConfirm={handleConfirmComplete}
+            title="Xác nhận hoàn tất bàn"
+            message="Bạn có chắc chắn muốn hoàn tất bàn này không?"
+            confirmText="Đồng ý"
+          />
+
+          {/* popup hoàn tất bàn thành công */}
+          <ConfirmPopup
+            isOpen={showCheckoutSuccessPopup}
+            onClose={() => setShowCheckoutSuccessPopup(false)}
+            onConfirm={() => setShowCheckoutSuccessPopup(false)}
+            title="Hoàn tất lịch hẹn thành công"
+            message="Lịch hẹn đã được Hoàn tất thành công."
             confirmText="OK"
           />
         </Card>
