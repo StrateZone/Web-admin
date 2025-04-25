@@ -28,8 +28,8 @@ export default function CommentList({ comments }: CommentListProps) {
 
       return (
         <div key={parent.commentId} className="space-y-3">
+          <h1>Bình Luận</h1>
           <CommentItem comment={parent} />
-
           {replies.length > 0 && (
             <div className="ml-6 space-y-2 border-l-2 border-gray-300 pl-4">
               {replies.map((reply) => {

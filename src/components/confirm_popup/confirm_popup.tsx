@@ -27,7 +27,7 @@ export function ConfirmPopup({
   if (!isOpen) return null; // Ẩn popup nếu không mở
 
   return (
-    <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <section className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
       <div className="w-full max-w-xl px-4">
         <Card className="max-w-xl">
           <CardBody>
@@ -40,7 +40,7 @@ export function ConfirmPopup({
               <Typography color="blue-gray" className="mb-6 mt-2" variant="h4">
                 {title}
               </Typography>
-              <Typography className="text-[16px] font-normal text-gray-500">
+              <Typography className="text-[16px] font-normal text-gray-500 whitespace-pre-line">
                 {message}
               </Typography>
               <div className="mt-6 flex justify-center gap-4">
