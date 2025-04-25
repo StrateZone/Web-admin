@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { config } from "../../../config";
 import PostDetail from "./[id]/page";
-import { Card, CardBody } from "@material-tailwind/react";
+import { Avatar, Card, CardBody } from "@material-tailwind/react";
 import { DefaultPagination } from "../pagination/pagination";
 import axios from "axios";
 import CreatePostForm from "../create_post/create_post_form";
@@ -262,7 +262,15 @@ export default function Posts() {
                     {post.title}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    Tạo bởi {post.createdByNavigation.fullName}
+                    <Avatar
+                      src={
+                        post.createdByNavigation.avatarUrl ||
+                        "https://docs.material-tailwind.com/img/face-2.jpg"
+                      }
+                      alt="avatar"
+                      className="w-8 h-8"
+                    />{" "}
+                    {post.createdByNavigation.fullName}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     {new Date(post.createdAt).toLocaleDateString("vi-VN")}

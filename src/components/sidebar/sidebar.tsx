@@ -16,6 +16,7 @@ type SidebarProps = {
 export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const router = useRouter();
   const [userRole, setUserRole] = useState<string>("");
+  const [userFullName, setuserFullName] = useState<string>("");
 
   // Lấy role từ localStorage khi component mount
   useEffect(() => {
@@ -24,16 +25,18 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       try {
         const parsedData = JSON.parse(authData);
         setUserRole(parsedData?.userRole || "");
+        setuserFullName(parsedData?.fullName || "");
       } catch (err) {
         console.error("Lỗi phân tích authData:", err);
       }
     }
   }, []);
   const MENU_ITEMS = [
-    // {
-    //   title: "Dashboard",
-    //   icon: () => <MdDashboard />,
-    // },
+    {
+      title: "Dashboard",
+      icon: () => <MdDashboard />,
+      roles: ["Admin"],
+    },
     {
       title: "Các Giao Dịch",
       icon: () => <GrTransaction />,
@@ -47,13 +50,13 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     {
       title: "Cuộc Hẹn",
       icon: () => <CiCalendar />,
-      roles: ["Admin"],
+      roles: ["Admin", "Staff"],
     },
-    {
-      title: "Điểm Danh",
-      icon: () => <FaCheck />,
-      roles: ["Staff", "Admin"],
-    },
+    // {
+    //   title: "Điểm Danh",
+    //   icon: () => <FaCheck />,
+    //   roles: ["Staff", "Admin"],
+    // },
     {
       title: "Bài Viết",
       icon: () => <BsFileEarmarkPost />,
@@ -86,7 +89,11 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     <div className="relative flex h-screen w-full max-w-[20rem] flex-col bg-white p-4 text-gray-700 shadow-xl shadow-blue-gray-900/5">
       <div className="flex p-4 my-2 relative">
         <h5 className="block text-xl font-semibold text-blue-gray-900 ml-8">
-          Sidebar
+          {userRole === "Admin"
+            ? "Xin Chào Admin"
+            : userRole === "Staff"
+              ? `Xin Chào Nhân Viên${userFullName ? ` - ${userFullName}` : ""}`
+              : "Xin Chào"}
         </h5>
       </div>
 

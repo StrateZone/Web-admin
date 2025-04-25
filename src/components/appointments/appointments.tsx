@@ -4,6 +4,10 @@ import {
   CardBody,
   CardHeader,
   Chip,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
   Option,
   Select,
   Typography,
@@ -17,45 +21,37 @@ import { GoArrowDownRight, GoArrowUpRight } from "react-icons/go";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { config } from "../../../config";
 
-export default function Appointments() {
-  type AppointmentData = {
-    appointmentId: number;
-    user: {
-      userId: number;
-      username: string;
-      fullName?: string;
-      email?: string;
-    };
-    totalPrice: number;
-    status: string;
-    createdAt: string;
-    tablesAppointments: Array<{
-      id: number;
-      tableId: number;
-      status: string;
-      scheduleTime: string;
-      endTime: string;
-      durationInHours: number;
-      price: number;
-      table: {
-        tableId: number;
-        roomName: string;
-        roomType: string;
-        roomDescription: string;
-      };
-    }>;
+type AppointmentData = {
+  appointmentId: number;
+  user: {
+    userId: number;
+    username: string;
+    fullName?: string;
+    email?: string;
   };
+  totalPrice: number;
+  status: string;
+  createdAt: string;
+};
 
+export default function Appointments() {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
-  const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [clickedAppointmentId, setclickedAppointmentId] = useState<
+    number | null
+  >(null);
+  const [appointmentDetails, setAppointmentDetails] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [appointmentStatus, setAppointmentStatus] = useState<string>("");
   const [orderBy, setOrderBy] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
+  const authData =
+    typeof window !== "undefined" ? localStorage.getItem("authData") : null;
+  const userRole = authData ? JSON.parse(authData)?.userRole : null;
+  const isAdmin = userRole === "Admin";
   const backendApi = config.BACKEND_API;
 
   // Debounce search input
@@ -72,14 +68,6 @@ export default function Appointments() {
   const handleSearchChange = (value: string | undefined) => {
     setSearchValue(value ?? "");
     setCurrentPage(1); // Reset về trang đầu tiên
-  };
-
-  const toggleRow = (appointmentId: number) => {
-    setExpandedRows((prev) =>
-      prev.includes(appointmentId)
-        ? prev.filter((id) => id !== appointmentId)
-        : [...prev, appointmentId],
-    );
   };
 
   const handleOrderByChange = (value: string | undefined) => {
@@ -141,6 +129,28 @@ export default function Appointments() {
     }
   };
 
+  const fetchAppointmentDetails = async () => {
+    try {
+      const response = await axios.get(
+        `${backendApi}/appointments/${clickedAppointmentId}`,
+      );
+      setAppointmentDetails(response.data);
+    } catch (error) {
+      console.error("Error fetching appointment details:", error);
+      setError("Lỗi khi tải chi tiết lịch hẹn.");
+    }
+  };
+
+  useEffect(() => {
+    if (clickedAppointmentId) {
+      fetchAppointmentDetails();
+    }
+  }, [clickedAppointmentId]);
+
+  const handleAppointmentClick = () => {
+    fetchAppointmentDetails();
+  };
+
   useEffect(() => {
     //console.log("Fetching appointments...");
     fetchAppointments();
@@ -152,6 +162,7 @@ export default function Appointments() {
   >(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [selectedTableInfo, setSelectedTableInfo] = useState<{
+    tableId: number;
     roomName: string;
     roomType: string;
     scheduleTime: string;
@@ -165,6 +176,7 @@ export default function Appointments() {
     tableAppointmentId: number,
     userId: number,
     tableInfo: {
+      tableId: number;
       roomName: string;
       roomType: string;
       scheduleTime: string;
@@ -180,7 +192,7 @@ export default function Appointments() {
   };
 
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  // Xác nhận hủy lịch hẹn
+  // Xác nhận hủy bàn
   const handleConfirmCancel = async () => {
     if (!selectedTableAppointmentId || !selectedUserId) return;
 
@@ -195,11 +207,83 @@ export default function Appointments() {
 
       // Gọi lại API để làm mới danh sách
       fetchAppointments();
+      fetchAppointmentDetails();
     } catch (error) {
       console.error("Lỗi hủy lịch:", error);
       alert("Hủy lịch hẹn thất bại!");
     }
   };
+
+  const [showDetailsPopup, setShowDetailsPopup] = useState(false);
+
+  const handleClosePopup = () => {
+    setShowDetailsPopup(false);
+    setAppointmentDetails(null);
+  };
+
+  const [showCheckinPopup, setShowCheckinPopup] = useState(false);
+  const [showCheckoutPopup, setShowCheckoutPopup] = useState(false);
+  const [selectedTableAppointmentUserId, setSelectedTableAppointmentUserId] =
+    useState<number | null>(null);
+
+  // Mở popup xác nhận điểm danh
+  const handleCheckinClick = (tableAppointmentId: number, userId: number) => {
+    setSelectedTableAppointmentId(tableAppointmentId);
+    setSelectedTableAppointmentUserId(userId);
+    setShowCheckinPopup(true);
+  };
+
+  // Xác nhận điểm danh lịch hẹn
+  const handleConfirmCheckin = async () => {
+    if (!selectedTableAppointmentId || !selectedTableAppointmentUserId) return;
+
+    try {
+      await axios.put(
+        `${backendApi}/tables-appointment/check-in/${selectedTableAppointmentId}/users/${selectedTableAppointmentUserId}`,
+      );
+
+      setShowCheckinPopup(false);
+      setSelectedTableAppointmentId(null);
+      setShowCheckinSuccessPopup(true);
+
+      fetchAppointments();
+      fetchAppointmentDetails();
+    } catch (error) {
+      console.error("Lỗi hủy lịch:", error);
+      alert("Hủy lịch hẹn thất bại!");
+    }
+  };
+
+  // Mở popup xác nhận hoàn tất bàn
+  const handleCompleteClick = (tableAppointmentId: number, userId: number) => {
+    setSelectedTableAppointmentId(tableAppointmentId);
+    setSelectedTableAppointmentUserId(userId);
+    setShowCheckoutPopup(true);
+  };
+
+  const handleConfirmComplete = async () => {
+    if (!selectedTableAppointmentId || !selectedTableAppointmentUserId) return;
+
+    try {
+      await axios.put(
+        `${backendApi}/tables-appointment/check-out/${selectedTableAppointmentId}/users/${selectedTableAppointmentUserId}`,
+      );
+
+      setShowCheckoutPopup(false);
+      setSelectedTableAppointmentId(null);
+      setShowCheckoutSuccessPopup(true);
+
+      fetchAppointments();
+      fetchAppointmentDetails();
+    } catch (error) {
+      console.error("Lỗi hoàn tất lịch:", error);
+      alert("Hoàn tất lịch hẹn thất bại!");
+    }
+  };
+
+  const [showCheckinSuccessPopup, setShowCheckinSuccessPopup] = useState(false);
+  const [showCheckoutSuccessPopup, setShowCheckoutSuccessPopup] =
+    useState(false);
 
   const statusColors: Record<string, string> = {
     pending: "yellow",
@@ -233,7 +317,7 @@ export default function Appointments() {
                   className="min-w-[170px]"
                 >
                   <Option value="">Tất cả trạng thái</Option>
-                  <Option value="pending">Đang chờ</Option>
+                  {/* <Option value="pending">Đang chờ</Option> */}
                   <Option value="confirmed">Đã đặt</Option>
                   <Option value="incoming">Sắp diễn ra</Option>
                   <Option value="checked_in">Đã nhận bàn</Option>
@@ -327,10 +411,6 @@ export default function Appointments() {
               </div>
             ) : (
               appointments.map((appointment) => {
-                const isExpanded = expandedRows.includes(
-                  appointment.appointmentId,
-                );
-
                 return (
                   <Card key={appointment.appointmentId} className="mb-4 shadow">
                     <CardBody>
@@ -338,26 +418,27 @@ export default function Appointments() {
                       <div className="flex flex-col gap-2">
                         <div
                           className="flex items-start justify-between cursor-pointer hover:bg-gray-50 rounded-md p-2"
-                          onClick={() => toggleRow(appointment.appointmentId)}
+                          onClick={() => {
+                            setclickedAppointmentId(null); // Reset trước
+                            setTimeout(() => {
+                              setclickedAppointmentId(
+                                appointment.appointmentId,
+                              ); // Gán lại sau 1 tick
+                              setShowDetailsPopup(true);
+                            }, 0);
+                          }}
                         >
                           <div className="flex gap-4 items-start">
-                            <span className="text-lg mt-1">
-                              {isExpanded ? (
-                                <FiChevronDown />
-                              ) : (
-                                <FiChevronRight />
-                              )}
-                            </span>
                             <div>
                               <Typography variant="small" className="font-bold">
                                 ID: {appointment.appointmentId}
                               </Typography>
                               <Typography className="text-sm text-blue-gray-600">
-                                {appointment.user.fullName} (
-                                {appointment.user.username})
+                                {appointment.user?.fullName} (
+                                {appointment.user?.username})
                               </Typography>
                               <Typography className="text-xs text-blue-gray-400">
-                                {appointment.user.email}
+                                {appointment.user?.email}
                               </Typography>
                             </div>
                           </div>
@@ -386,138 +467,164 @@ export default function Appointments() {
                           </div>
                         </div>
                       </div>
-
-                      {/* Chi tiết nếu mở rộng */}
-                      {isExpanded && (
-                        <div className="mt-4 pl-6">
-                          <Typography
-                            variant="small"
-                            className="font-semibold mb-2"
-                          >
-                            Các bàn đã đặt:
-                          </Typography>
-                          {appointment.tablesAppointments?.length === 0 ? (
-                            <Typography className="text-sm text-blue-gray-500 italic">
-                              Không có bàn nào cho cuộc hẹn này.
-                            </Typography>
-                          ) : (
-                            <div className="overflow-x-auto">
-                              <table className="w-full text-sm text-left border">
-                                <thead className="bg-blue-gray-50 text-gray-700">
-                                  <tr>
-                                    <th className="py-1 px-2">Phòng</th>
-                                    <th className="py-1 px-2">Loại Phòng</th>
-                                    <th className="py-1 px-2">Giờ bắt đầu</th>
-                                    <th className="py-1 px-2">Giờ kết thúc</th>
-                                    <th className="py-1 px-2">Ngày</th>
-                                    <th className="py-1 px-2">Giá</th>
-                                    <th className="py-1 px-2">Trạng thái</th>
-                                    <th className="py-1 px-2">Hành Động</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {appointment.tablesAppointments.map(
-                                    (tableApp) => (
-                                      <tr
-                                        key={tableApp.id}
-                                        className="border-t"
-                                      >
-                                        <td className="py-1 px-2">
-                                          {tableApp.table.roomName}
-                                        </td>
-                                        <td className="py-1 px-2">
-                                          {tableApp.table.roomType}
-                                        </td>
-                                        <td className="py-1 px-2">
-                                          {new Date(
-                                            tableApp.scheduleTime,
-                                          ).toLocaleTimeString("vi-VN", {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                          })}
-                                        </td>
-                                        <td className="py-1 px-2">
-                                          {new Date(
-                                            tableApp.endTime,
-                                          ).toLocaleTimeString("vi-VN", {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                          })}
-                                        </td>
-                                        <td className="py-1 px-2">
-                                          {new Date(
-                                            tableApp.scheduleTime,
-                                          ).toLocaleDateString("vi-VN")}
-                                        </td>
-                                        <td className="py-1 px-2">
-                                          {tableApp.price.toLocaleString()} đ
-                                        </td>
-                                        <td className="py-1 px-2">
-                                          {tableApp.status}
-                                        </td>
-                                        <td className="py-1 px-2">
-                                          <Button
-                                            variant="gradient"
-                                            color="red"
-                                            onClick={() =>
-                                              handleCancelClick(
-                                                tableApp.id,
-                                                appointment.user.userId,
-                                                {
-                                                  roomName:
-                                                    tableApp.table.roomName,
-                                                  roomType:
-                                                    tableApp.table.roomType,
-                                                  scheduleTime: new Date(
-                                                    tableApp.scheduleTime,
-                                                  ).toLocaleTimeString(
-                                                    "vi-VN",
-                                                    {
-                                                      hour: "2-digit",
-                                                      minute: "2-digit",
-                                                    },
-                                                  ),
-                                                  endTime: new Date(
-                                                    tableApp.endTime,
-                                                  ).toLocaleTimeString(
-                                                    "vi-VN",
-                                                    {
-                                                      hour: "2-digit",
-                                                      minute: "2-digit",
-                                                    },
-                                                  ),
-                                                  date: new Date(
-                                                    tableApp.scheduleTime,
-                                                  ).toLocaleDateString("vi-VN"),
-                                                  price: tableApp.price,
-                                                },
-                                              )
-                                            }
-                                            disabled={
-                                              ![
-                                                "pending",
-                                                "confirmed",
-                                              ].includes(tableApp.status)
-                                            }
-                                          >
-                                            Hủy
-                                          </Button>
-                                        </td>
-                                      </tr>
-                                    ),
-                                  )}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </CardBody>
                   </Card>
                 );
               })
             )}
           </CardBody>
+          {appointmentDetails &&
+            !showPopup &&
+            !showSuccessPopup &&
+            !showCheckinPopup &&
+            !showCheckinSuccessPopup &&
+            !showCheckoutPopup &&
+            !showCheckoutSuccessPopup && (
+              <Dialog
+                open={showDetailsPopup}
+                handler={handleClosePopup}
+                className="z-10 bg-white"
+              >
+                <DialogHeader>
+                  Chi tiết lịch hẹn {appointmentDetails.appointmentId}
+                </DialogHeader>
+                <DialogBody>
+                  <Typography>
+                    Tổng giá:{" "}
+                    {appointmentDetails.totalPrice.toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })}
+                  </Typography>
+                  <Typography>
+                    Trạng thái: {appointmentDetails.status}
+                  </Typography>
+
+                  <Typography className="mt-4">Các bàn:</Typography>
+                  {appointmentDetails.tablesAppointments?.map((table: any) => (
+                    <div key={table.id} className="mt-2 p-2 border rounded-md">
+                      <Typography>Bàn số: {table.tableId}</Typography>
+                      <Typography>Phòng: {table.table.roomName}</Typography>
+                      <Typography>Trạng thái: {table.status}</Typography>
+                      <Typography>
+                        Giờ bắt đầu:{" "}
+                        {new Date(table.scheduleTime).toLocaleTimeString(
+                          "vi-VN",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}
+                      </Typography>
+                      <Typography>
+                        Giờ kết thúc:{" "}
+                        {new Date(table.endTime).toLocaleTimeString("vi-VN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </Typography>
+                      <Typography>
+                        Ngày:{" "}
+                        {new Date(table.scheduleTime).toLocaleDateString(
+                          "vi-VN",
+                        )}
+                      </Typography>
+                      <Typography>
+                        Giá:{" "}
+                        {table.price.toLocaleString("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        })}
+                      </Typography>
+                      {/* Các nút điều khiển */}
+                      <div className="flex gap-3 flex-wrap">
+                        {/* Nút Hủy Bàn */}
+                        {isAdmin && (
+                          <Button
+                            variant="gradient"
+                            color="red"
+                            onClick={() =>
+                              handleCancelClick(
+                                table.id,
+                                appointmentDetails.userId,
+                                {
+                                  tableId: table.id,
+                                  roomName: table.table.roomName,
+                                  roomType: table.table.roomType,
+                                  scheduleTime: new Date(
+                                    table.scheduleTime,
+                                  ).toLocaleString("vi-VN"),
+                                  endTime: new Date(
+                                    table.endTime,
+                                  ).toLocaleString("vi-VN"),
+                                  date: new Date(
+                                    table.scheduleTime,
+                                  ).toLocaleDateString("vi-VN"),
+                                  price: table.price,
+                                },
+                              )
+                            }
+                            disabled={
+                              !["pending", "confirmed"].includes(table.status)
+                            }
+                          >
+                            Hủy Bàn
+                          </Button>
+                        )}
+
+                        {/* Nút Điểm danh / Hoàn tất */}
+                        {table.status === "checked_in" ? (
+                          <Button
+                            variant="gradient"
+                            color="green"
+                            onClick={() =>
+                              handleCompleteClick(
+                                table.id,
+                                appointmentDetails.userId,
+                              )
+                            }
+                          >
+                            Hoàn tất
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="gradient"
+                            color="blue"
+                            onClick={() =>
+                              handleCheckinClick(
+                                table.id,
+                                appointmentDetails.userId,
+                              )
+                            }
+                            disabled={
+                              !(
+                                table.status === "incoming" &&
+                                new Date() >=
+                                  new Date(
+                                    new Date(table.scheduleTime).getTime() -
+                                      5 * 60 * 1000,
+                                  )
+                              )
+                            }
+                          >
+                            Điểm danh
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </DialogBody>
+                <DialogFooter>
+                  <Button
+                    variant="outlined"
+                    color="red"
+                    onClick={handleClosePopup}
+                  >
+                    Close
+                  </Button>
+                </DialogFooter>
+              </Dialog>
+            )}
           <div className="flex justify-center mt-4">
             <DefaultPagination
               currentPage={currentPage}
@@ -534,12 +641,13 @@ export default function Appointments() {
             title="Xác nhận hủy lịch hẹn"
             message={
               selectedTableInfo
-                ? `Bạn có chắc chắn muốn hủy lịch hẹn:\n
+                ? `Bạn có chắc chắn muốn hủy bàn ${selectedTableInfo.tableId}:\n
                 - Phòng: ${selectedTableInfo.roomName} (${selectedTableInfo.roomType})\n
                 - Ngày: ${selectedTableInfo.date}\n
                 - Giờ: ${selectedTableInfo.scheduleTime} - ${selectedTableInfo.endTime}\n
-                - Giá: ${selectedTableInfo.price.toLocaleString()} đ`
-                : "Bạn có chắc chắn muốn hủy lịch hẹn này không?"
+                - Giá: ${selectedTableInfo.price.toLocaleString()} đ\n
+                Các người chơi của bàn này sẽ được hoàn 100% số tiền đã trả`
+                : "Bạn có chắc chắn muốn hủy bàn này không?"
             }
             confirmText="Đồng ý"
           />
@@ -549,15 +657,56 @@ export default function Appointments() {
             isOpen={showSuccessPopup}
             onClose={() => setShowSuccessPopup(false)}
             onConfirm={() => setShowSuccessPopup(false)}
-            title="Hủy lịch hẹn thành công"
-            message="Lịch hẹn của bạn đã được hủy thành công."
+            title="Hủy bàn thành công"
+            message={
+              selectedTableInfo
+                ? `Bàn ${selectedTableInfo.tableId} đã được hủy thành công.`
+                : "Hủy bàn thành công"
+            }
+            confirmText="OK"
+          />
+
+          {/* Popup xác nhận điểm danh */}
+          <ConfirmPopup
+            isOpen={showCheckinPopup}
+            onClose={() => setShowCheckinPopup(false)}
+            onConfirm={handleConfirmCheckin}
+            title="Xác nhận điểm danh"
+            message="Bạn có chắc chắn muốn điểm danh lịch hẹn này không?"
+            confirmText="Đồng ý"
+          />
+
+          {/* popup điểm danh thành công */}
+          <ConfirmPopup
+            isOpen={showCheckinSuccessPopup}
+            onClose={() => setShowCheckinSuccessPopup(false)}
+            onConfirm={() => setShowCheckinSuccessPopup(false)}
+            title="Điểm danh lịch hẹn thành công"
+            message="Lịch hẹn đã được điểm danh thành công."
+            confirmText="OK"
+          />
+
+          {/* Popup xác nhận hoàn tất bàn */}
+          <ConfirmPopup
+            isOpen={showCheckoutPopup}
+            onClose={() => setShowCheckoutPopup(false)}
+            onConfirm={handleConfirmComplete}
+            title="Xác nhận hoàn tất bàn"
+            message="Bạn có chắc chắn muốn hoàn tất bàn này không?"
+            confirmText="Đồng ý"
+          />
+
+          {/* popup hoàn tất bàn thành công */}
+          <ConfirmPopup
+            isOpen={showCheckoutSuccessPopup}
+            onClose={() => setShowCheckoutSuccessPopup(false)}
+            onConfirm={() => setShowCheckoutSuccessPopup(false)}
+            title="Hoàn tất lịch hẹn thành công"
+            message="Lịch hẹn đã được Hoàn tất thành công."
             confirmText="OK"
           />
         </Card>
       </div>
     </div>
-    // <div className="px-4 flex flex-col items-center w-full pt-12 bg-gray-400">
-
-    // </div>
   );
 }
