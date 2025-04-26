@@ -7,142 +7,74 @@ import {
   Input,
   Button,
 } from "@material-tailwind/react";
-import { AiOutlineEdit } from "react-icons/ai"; // Biểu tượng bút
 import axios from "axios";
 import { config } from "../../../config";
+import OpenCloseConfig from "../open_close_config/open_close_config";
+import CancelPolicyConfig from "../cancel_policy_config/cancel_policy_config";
+import ConfigCommunityPoint from "../config_community_point/config_community_point";
+
+export type SystemConfig = {
+  id: number;
+  adminId: number;
+  openTime: string; // dạng "HH:mm:ss"
+  closeTime: string; // dạng "HH:mm:ss"
+  appointment_Refund100_HoursFromScheduleTime: number; // số thực (có thể có .5)
+  appointment_Incoming_HoursFromScheduleTime: number; // số thực
+  appointment_Checkin_MinutesFromScheduleTime: number; // phút, số nguyên
+  max_NumberOfTables_CancelPerWeek: number; // số nguyên
+  contributionPoints_PerThread: number; // điểm
+  contributionPoints_PerComment: number; // điểm
+  userPoints_PerCheckinTable_ByPercentageOfTablesPrice: number; // tỷ lệ (0.002 = 0.2%)
+  status: string; //status
+};
 
 export default function System() {
-  const [openTime, setOpenTime] = useState<string>("");
-  const [closeTime, setCloseTime] = useState<string>("");
-  const [status, setStatus] = useState<string>("active");
+  const [systemConfigData, setSystemConfigData] = useState<SystemConfig | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const backendApi = config.BACKEND_API;
 
-  const [isEditing, setIsEditing] = useState<boolean>(false); // Trạng thái chỉnh sửa
-
-  useEffect(() => {
-    axios
-      .get(`${backendApi}/system/1`)
-      .then((res) => {
-        const { openTime, closeTime, status } = res.data;
-        setOpenTime(openTime.slice(0, 5)); // Cắt bỏ giây, giữ "hh:mm"
-        setCloseTime(closeTime.slice(0, 5));
-        setStatus(status);
-      })
-      .catch((err) => {
-        console.error("Lỗi khi lấy dữ liệu hệ thống:", err);
-      });
-  }, []);
-
-  const handleSave = async () => {
+  const fetchData = async () => {
     try {
-      await axios.put(`${backendApi}/system/working-hour/1`, {
-        openHour: openTime + ":00", // thêm giây
-        closeHour: closeTime + ":00", // thêm giây
-      });
-
-      console.log("Cập nhật thành công!");
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Lỗi khi cập nhật giờ hoạt động:", error);
-      alert("Cập nhật thất bại. Vui lòng thử lại!");
+      setIsLoading(true);
+      const res = await axios.get<SystemConfig>(`${backendApi}/system/1`);
+      setSystemConfigData(res.data);
+    } catch (err) {
+      console.error("Lỗi khi lấy dữ liệu hệ thống:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <div className="flex flex-col min-h-full p-6 bg-gray-400">
-      <div className="flex-grow flex flex-col">
-        <Card className="w-full max-w-3xl mx-auto px-6 py-4">
-          <CardHeader
-            variant="gradient"
-            color="gray"
-            className="mb-8 p-6 flex justify-between items-center"
-          >
-            <Typography variant="h6" color="white">
-              Hệ Thống
-            </Typography>
-            {!isEditing && (
-              <AiOutlineEdit
-                className="cursor-pointer text-white"
-                size={20}
-                onClick={() => setIsEditing(true)} // Kích hoạt chế độ chỉnh sửa
-              />
-            )}
-          </CardHeader>
-          <CardBody>
-            <div className="space-y-6">
-              <div>
-                <Typography variant="small" color="blue-gray" className="mb-2">
-                  Thời gian mở cửa
-                </Typography>
-                {!isEditing ? (
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="text-lg font-semibold"
-                  >
-                    {openTime}
-                  </Typography>
-                ) : (
-                  <select
-                    value={openTime}
-                    onChange={(e) => setOpenTime(e.target.value)}
-                    className="w-full"
-                  >
-                    {Array.from({ length: 24 }).map((_, i) => {
-                      const hour = i.toString().padStart(2, "0");
-                      return (
-                        <option key={i} value={`${hour}:00`}>
-                          {hour}:00
-                        </option>
-                      );
-                    })}
-                  </select>
-                )}
-              </div>
-
-              <div>
-                <Typography variant="small" color="blue-gray" className="mb-2">
-                  Thời gian đóng cửa
-                </Typography>
-                {!isEditing ? (
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="text-lg font-semibold"
-                  >
-                    {closeTime}
-                  </Typography>
-                ) : (
-                  <select
-                    value={closeTime}
-                    onChange={(e) => setCloseTime(e.target.value)}
-                    className="w-full"
-                  >
-                    {Array.from({ length: 24 }).map((_, i) => {
-                      const hour = i.toString().padStart(2, "0");
-                      return (
-                        <option key={i} value={`${hour}:00`}>
-                          {hour}:00
-                        </option>
-                      );
-                    })}
-                  </select>
-                )}
-              </div>
-
-              {isEditing && (
-                <div className="flex justify-end gap-4">
-                  <Button color="green" onClick={handleSave}>
-                    Lưu thay đổi
-                  </Button>
-                  <Button color="red" onClick={() => setIsEditing(false)}>
-                    Hủy
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardBody>
-        </Card>
+      <CardHeader
+        variant="gradient"
+        color="gray"
+        className="mb-8 p-6 flex justify-between items-center"
+      >
+        <Typography variant="h4" color="white">
+          Hệ Thống
+        </Typography>
+      </CardHeader>
+      <div className="flex-grow flex flex-col gap-6">
+        <OpenCloseConfig
+          systemConfigData={systemConfigData}
+          isLoading={isLoading}
+        />
+        <CancelPolicyConfig
+          systemConfigData={systemConfigData}
+          isLoading={isLoading}
+        />
+        <ConfigCommunityPoint
+          systemConfigData={systemConfigData}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
