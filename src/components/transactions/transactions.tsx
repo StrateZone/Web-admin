@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DefaultPagination } from "../pagination/pagination";
 import axios from "axios";
 import { config } from "../../../config";
+import ServicePricesList from "../price_list/price_list";
 
 const TABS = [
   {
@@ -273,6 +274,7 @@ export default function Transactions() {
           </div>
         </Card>
       </div>
+      <ServicePricesList></ServicePricesList>
     </div>
   );
 }
