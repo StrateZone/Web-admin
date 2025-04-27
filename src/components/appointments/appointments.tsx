@@ -129,6 +129,11 @@ export default function Appointments() {
     }
   };
 
+  useEffect(() => {
+    //console.log("Fetching appointments...");
+    fetchAppointments();
+  }, [currentPage, appointmentStatus, orderBy, debouncedSearchValue]);
+
   const fetchAppointmentDetails = async () => {
     try {
       const response = await axios.get(
@@ -150,11 +155,6 @@ export default function Appointments() {
   const handleAppointmentClick = () => {
     fetchAppointmentDetails();
   };
-
-  useEffect(() => {
-    //console.log("Fetching appointments...");
-    fetchAppointments();
-  }, [currentPage, appointmentStatus, orderBy, debouncedSearchValue]);
 
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTableAppointmentId, setSelectedTableAppointmentId] = useState<

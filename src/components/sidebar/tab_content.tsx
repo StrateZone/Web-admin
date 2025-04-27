@@ -7,6 +7,7 @@ import Posts from "../posts/posts";
 import Transactions from "../transactions/transactions";
 import System from "../system/system";
 import Checkin from "../checkin/checkin";
+import RoomManagement from "../room_management/room_management";
 
 type TabContentProps = {
   activeTab: string;
@@ -33,6 +34,8 @@ export default function TabContent({
         return <System />;
       case "Điểm Danh":
         return <Checkin />;
+      case "Quản lý phòng":
+        return <RoomManagement />;
       default:
         return (
           <div className="flex justify-center items-center text-gray-500 h-screen">
