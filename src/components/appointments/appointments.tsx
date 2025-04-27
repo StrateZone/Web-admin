@@ -48,6 +48,9 @@ export default function Appointments() {
   const [orderBy, setOrderBy] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
+  const [minutesBeforeSchedule, setMinutesBeforeSchedule] = useState<
+    number | null
+  >(null);
   const authData =
     typeof window !== "undefined" ? localStorage.getItem("authData") : null;
   const userRole = authData ? JSON.parse(authData)?.userRole : null;
@@ -64,6 +67,21 @@ export default function Appointments() {
       clearTimeout(handler); // Xoá timeout nếu người dùng tiếp tục gõ
     };
   }, [searchValue]);
+
+  useEffect(() => {
+    const fetchMinutesBeforeSchedule = async () => {
+      try {
+        const response = await axios.get(
+          `${backendApi}/system/1/check-in/minutes-before-schedule`,
+        );
+        setMinutesBeforeSchedule(response.data); // response trả về 1 số phút
+      } catch (error) {
+        console.error("Lỗi khi lấy minutes-before-schedule:", error);
+      }
+    };
+
+    fetchMinutesBeforeSchedule();
+  }, [backendApi]);
 
   const handleSearchChange = (value: string | undefined) => {
     setSearchValue(value ?? "");
@@ -599,10 +617,11 @@ export default function Appointments() {
                             disabled={
                               !(
                                 table.status === "incoming" &&
+                                minutesBeforeSchedule !== null &&
                                 new Date() >=
                                   new Date(
                                     new Date(table.scheduleTime).getTime() -
-                                      5 * 60 * 1000,
+                                      minutesBeforeSchedule * 60 * 1000,
                                   )
                               )
                             }
