@@ -12,6 +12,7 @@ import { config } from "../../../config";
 import OpenCloseConfig from "../open_close_config/open_close_config";
 import CancelPolicyConfig from "../cancel_policy_config/cancel_policy_config";
 import ConfigCommunityPoint from "../config_community_point/config_community_point";
+import ProfanitiesManagement from "../profanities_management/profanities_management";
 
 export type SystemConfig = {
   id: number;
@@ -75,6 +76,7 @@ export default function System() {
           systemConfigData={systemConfigData}
           isLoading={isLoading}
         />
+        <ProfanitiesManagement />
       </div>
     </div>
   );

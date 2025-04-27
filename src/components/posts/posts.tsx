@@ -49,8 +49,6 @@ export default function Posts() {
   const userRole = authData ? JSON.parse(authData)?.userRole : null;
   const isAdmin = userRole === "Admin";
   const [isCreating, setIsCreating] = useState(false);
-
-  const router = useRouter();
   const backendApi = config.BACKEND_API;
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -81,16 +79,52 @@ export default function Posts() {
     setLoading(true);
     setError(null);
 
+    const all_statuses = [
+      "published",
+      "rejected",
+      "pending",
+      "deleted",
+      "hidden",
+      "edit_pending",
+    ];
+
+    const pending_statuses = ["pending", "edit_pending"];
+
     try {
+      const params: any = {
+        "page-number": currentPage,
+        "page-size": 10,
+        ...(searchKeyword && { Search: searchKeyword }),
+      };
+
+      if (activeTab === "pending") {
+        pending_statuses.forEach((status) => {
+          params.statuses = params.statuses || [];
+          params.statuses.push(status);
+        });
+      } else {
+        all_statuses.forEach((status) => {
+          params.statuses = params.statuses || [];
+          params.statuses.push(status);
+        });
+      }
+
       const response = await axios.get(
         `${backendApi}/threads/filter/statuses-and-tags`,
         {
           signal: controller.signal,
-          params: {
-            "page-number": currentPage,
-            "page-size": 10,
-            ...(activeTab === "pending" && { statuses: "pending" }),
-            ...(searchKeyword && { Search: searchKeyword }),
+          params,
+          paramsSerializer: (params) => {
+            const query = new URLSearchParams();
+            for (const key in params) {
+              const value = params[key];
+              if (Array.isArray(value)) {
+                value.forEach((v) => query.append(key, v));
+              } else {
+                query.append(key, value);
+              }
+            }
+            return query.toString();
           },
         },
       );
@@ -297,11 +331,13 @@ export default function Posts() {
                           ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-white"
                           : post.status === "pending"
                             ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-white"
-                            : post.status === "rejected"
-                              ? "bg-red-100 text-red-800 dark:bg-red-700 dark:text-white"
-                              : post.status === "deleted"
-                                ? "bg-red-900 text-red-100 dark:bg-yellow-700 dark:text-white"
-                                : "bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-white"
+                            : post.status === "edit_pending"
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-white"
+                              : post.status === "rejected"
+                                ? "bg-red-100 text-red-800 dark:bg-red-700 dark:text-white"
+                                : post.status === "deleted"
+                                  ? "bg-red-900 text-red-100 dark:bg-yellow-700 dark:text-white"
+                                  : "bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-white"
                       }`}
                     >
                       {post.status}
