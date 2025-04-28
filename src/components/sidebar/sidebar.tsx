@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { MdLogout, MdOutlineSensorDoor } from "react-icons/md";
+import { MdAttachMoney, MdLogout, MdOutlineSensorDoor } from "react-icons/md";
 import { MdDashboard } from "react-icons/md";
 import { CiCalendar } from "react-icons/ci";
 import { BsFileEarmarkPost } from "react-icons/bs";
@@ -39,7 +39,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     },
     {
       title: "Các Giao Dịch",
-      icon: () => <GrTransaction />,
+      icon: () => <MdAttachMoney />,
       roles: ["Admin"],
     },
     {

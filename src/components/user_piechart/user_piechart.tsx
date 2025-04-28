@@ -28,13 +28,12 @@ const UserPieChart = () => {
         const users = res.data;
 
         // Lọc bỏ Admin và Staff
-        const filtered = users.filter(
-          (user: User) =>
-            user.userRole !== "Admin" && user.userRole !== "Staff",
-        );
+        // const filtered = users.filter(
+        //   (user: User) => user.userRole !== "Admin" && user.userRole !== "Staff"
+        // );
 
         // Đếm số lượng user theo role
-        const countByRole = filtered.reduce(
+        const countByRole = users.reduce(
           (acc: Record<string, number>, user: User) => {
             const role = user.userRole || "Unknown";
             acc[role] = (acc[role] || 0) + 1;
@@ -59,7 +58,10 @@ const UserPieChart = () => {
   }, []);
 
   return (
-    <div className="w-full h-[400px] p-4 bg-white rounded-2xl shadow">
+    <div className="w-full max-w-[600px] h-[300px] p-4 bg-white rounded-2xl shadow">
+      <h2 className="text-lg font-semibold mb-4 text-black">
+        Các người dùng của hệ thống
+      </h2>
       <ResponsiveContainer width="100%" height="90%">
         <PieChart>
           <Pie
@@ -70,7 +72,7 @@ const UserPieChart = () => {
             label={({ name, percent }) =>
               `${name}: ${(percent * 100).toFixed(0)}%`
             }
-            outerRadius={120}
+            outerRadius={80}
             fill="#8884d8"
             dataKey="value"
           >
