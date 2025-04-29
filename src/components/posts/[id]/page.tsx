@@ -239,14 +239,16 @@ export default function PostDetail({
             post.status === "published"
               ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-white"
               : post.status === "pending"
-                ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-white"
+                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-white"
                 : post.status === "edit_pending"
-                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-white"
+                  ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-600 dark:text-white"
                   : post.status === "rejected"
                     ? "bg-red-100 text-red-800 dark:bg-red-700 dark:text-white"
                     : post.status === "deleted"
-                      ? "bg-red-900 text-red-100 dark:bg-yellow-700 dark:text-white"
-                      : "bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-white"
+                      ? "bg-red-200 text-red-800 dark:bg-red-800 dark:text-white"
+                      : post.status === "hidden"
+                        ? "bg-gray-700 text-gray-100 dark:bg-gray-800 dark:text-white"
+                        : "bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-white"
           }`}
         >
           {post.status === "published"
@@ -254,12 +256,14 @@ export default function PostDetail({
             : post.status === "rejected"
               ? "Đã từ chối"
               : post.status === "deleted"
-                ? "Đã ẩn"
+                ? "Đã xóa"
                 : post.status === "pending"
                   ? "Chờ duyệt"
                   : post.status === "edit_pending"
                     ? "Chờ duyệt cập nhật"
-                    : "Chờ duyệt"}
+                    : post.status === "hidden"
+                      ? "Đã ẩn"
+                      : "Chờ duyệt"}
         </span>
       </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Card } from "@material-tailwind/react";
 import { toast } from "react-toastify";
@@ -21,22 +21,36 @@ interface Tag {
 
 interface CreatePostFormProps {
   userId: number;
-  tags: Tag[];
   onCancel: () => void;
   onCreated: () => void;
 }
 
 const CreatePostForm: React.FC<CreatePostFormProps> = ({
   userId,
-  tags,
   onCancel,
   onCreated,
 }) => {
+  const [threadTags, setThreadTags] = useState<Tag[]>([]);
   const backendApi = config.BACKEND_API;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [content, setContent] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState("");
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await axios.get(
+          "https://backend-production-ac5e.up.railway.app/api/tags/by-role?role=Admin",
+        );
+        setThreadTags(response.data); // Lưu các tag vào state
+      } catch (err) {
+        console.error("Lỗi fetch tag:", err);
+      }
+    };
+
+    fetchTags();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -153,7 +167,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({
             Chọn thẻ bài viết
           </label>
           <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
+            {threadTags.map((tag) => (
               <label key={tag.tagId} className="cursor-pointer">
                 <input
                   type="checkbox"
@@ -184,10 +198,10 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({
           </div>
         </div>
 
-        <label className="flex items-center space-x-2">
+        {/* <label className="flex items-center space-x-2">
           <input type="checkbox" name="isDrafted" />
           <span>Lưu nháp</span>
-        </label>
+        </label> */}
 
         <div className="flex gap-4">
           <button
