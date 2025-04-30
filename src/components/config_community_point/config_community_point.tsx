@@ -110,7 +110,12 @@ export default function ConfigCommunityPoint({
                   type="number"
                   className="w-full p-2 border rounded"
                   value={pointPerThread}
-                  onChange={(e) => setPointPerThread(Number(e.target.value))}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setPointPerThread(Number(e.target.value));
+                    }
+                  }}
                 />
               )}
             </div>
@@ -129,7 +134,12 @@ export default function ConfigCommunityPoint({
                   type="number"
                   className="w-full p-2 border rounded"
                   value={pointPerComment}
-                  onChange={(e) => setPointPerComment(Number(e.target.value))}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setPointPerComment(Number(e.target.value));
+                    }
+                  }}
                 />
               )}
             </div>
@@ -149,9 +159,12 @@ export default function ConfigCommunityPoint({
                   step="0.01"
                   className="w-full p-2 border rounded"
                   value={percentCheckinReward}
-                  onChange={(e) =>
-                    setPercentCheckinReward(Number(e.target.value))
-                  }
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setPercentCheckinReward(Number(e.target.value));
+                    }
+                  }}
                 />
               )}
             </div>

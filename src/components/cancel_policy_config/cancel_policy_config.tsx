@@ -146,7 +146,12 @@ export default function CancelPolicyConfig({
                   type="number"
                   className="w-full p-2 border rounded"
                   value={incomingHour}
-                  onChange={(e) => setIncomingHour(Number(e.target.value))}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setIncomingHour(Number(e.target.value));
+                    }
+                  }}
                 />
               )}
             </div>
@@ -164,7 +169,12 @@ export default function CancelPolicyConfig({
                   type="number"
                   className="w-full p-2 border rounded"
                   value={checkinMinutes}
-                  onChange={(e) => setCheckinMinutes(Number(e.target.value))}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setCheckinMinutes(Number(e.target.value));
+                    }
+                  }}
                 />
               )}
             </div>
@@ -182,7 +192,12 @@ export default function CancelPolicyConfig({
                   type="number"
                   className="w-full p-2 border rounded"
                   value={maxCancelPerWeek}
-                  onChange={(e) => setMaxCancelPerWeek(Number(e.target.value))}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setMaxCancelPerWeek(Number(e.target.value));
+                    }
+                  }}
                 />
               )}
             </div>

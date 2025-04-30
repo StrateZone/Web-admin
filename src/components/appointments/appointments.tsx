@@ -314,6 +314,21 @@ export default function Appointments() {
     refunded: "orange",
     incompleted: "darkgray",
     incoming: "indigo",
+    unfinished: "brown",
+  };
+
+  const statusLabels: Record<string, string> = {
+    pending: "Đang chờ",
+    confirmed: "Đã đặt",
+    checked_in: "Đã check-in",
+    completed: "Hoàn thành",
+    cancelled: "Đã hủy",
+    unpaid: "Chưa thanh toán",
+    expired: "Hết hạn",
+    refunded: "Đã hoàn tiền",
+    incompleted: "Chưa hoàn thành",
+    incoming: "Sắp diễn ra",
+    unfinished: "Chưa kết thúc",
   };
 
   return (
@@ -338,11 +353,12 @@ export default function Appointments() {
                   {/* <Option value="pending">Đang chờ</Option> */}
                   <Option value="confirmed">Đã đặt</Option>
                   <Option value="incoming">Sắp diễn ra</Option>
-                  <Option value="checked_in">Đã nhận bàn</Option>
+                  <Option value="checked_in">Đã check-in</Option>
                   <Option value="cancelled">Đã hủy</Option>
-                  <Option value="unpaid">Chưa thanh toán</Option>
+                  {/* <Option value="unpaid">Chưa thanh toán</Option> */}
                   <Option value="expired">Hết hạn</Option>
                   <Option value="refunded">Đã hoàn tiền</Option>
+                  <Option value="completed">Đã hoàn thành</Option>
                 </Select>
               </div>
 
@@ -474,7 +490,7 @@ export default function Appointments() {
                                 (statusColors[appointment.status] as color) ||
                                 "gray"
                               }
-                              value={appointment.status}
+                              value={statusLabels[appointment.status]}
                               className="py-0.5 px-2 text-[11px] font-medium w-fit"
                             />
                             <Typography className="text-xs text-blue-gray-400">
@@ -514,16 +530,27 @@ export default function Appointments() {
                       currency: "VND",
                     })}
                   </Typography>
-                  <Typography>
-                    Trạng thái: {appointmentDetails.status}
-                  </Typography>
+                  <Chip
+                    variant="gradient"
+                    color={
+                      (statusColors[appointmentDetails.status] as color) ||
+                      "gray"
+                    }
+                    value={statusLabels[appointmentDetails.status]}
+                    className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                  />
 
                   <Typography className="mt-4">Các bàn:</Typography>
                   {appointmentDetails.tablesAppointments?.map((table: any) => (
                     <div key={table.id} className="mt-2 p-2 border rounded-md">
                       <Typography>Bàn số: {table.tableId}</Typography>
                       <Typography>Phòng: {table.table.roomName}</Typography>
-                      <Typography>Trạng thái: {table.status}</Typography>
+                      <Chip
+                        variant="gradient"
+                        color={(statusColors[table.status] as color) || "gray"}
+                        value={statusLabels[table.status]}
+                        className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                      />
                       <Typography>
                         Giờ bắt đầu:{" "}
                         {new Date(table.scheduleTime).toLocaleTimeString(
@@ -602,7 +629,7 @@ export default function Appointments() {
                               )
                             }
                           >
-                            Hoàn tất
+                            Check-out
                           </Button>
                         ) : (
                           <Button
@@ -626,7 +653,7 @@ export default function Appointments() {
                               )
                             }
                           >
-                            Điểm danh
+                            Check-in
                           </Button>
                         )}
                       </div>
@@ -639,7 +666,7 @@ export default function Appointments() {
                     color="red"
                     onClick={handleClosePopup}
                   >
-                    Close
+                    Đóng
                   </Button>
                 </DialogFooter>
               </Dialog>
