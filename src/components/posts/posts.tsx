@@ -281,7 +281,11 @@ export default function Posts() {
               <div
                 key={post.threadId}
                 className="bg-gray-200 dark:bg-gray-800 rounded-xl shadow hover:shadow-lg cursor-pointer transition-all relative"
-                onClick={() => setSelectedPostId(post.threadId)}
+                onClick={() => {
+                  if (post.status !== "deleted") {
+                    setSelectedPostId(post.threadId);
+                  }
+                }}
               >
                 {post.thumbnailUrl && (
                   <img
@@ -290,7 +294,7 @@ export default function Posts() {
                     className="w-full h-40 object-cover rounded-t-xl"
                   />
                 )}
-                <div className="p-4 relative">
+                <div className="p-4 relative pb-10">
                   <h3 className="text-lg font-semibold line-clamp-2 text-gray-900 dark:text-white">
                     {post.title}
                   </h3>

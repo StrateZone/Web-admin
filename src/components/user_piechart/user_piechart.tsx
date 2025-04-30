@@ -16,6 +16,14 @@ type User = {
   userRole: string;
 };
 
+const roleToVietnamese: Record<string, string> = {
+  Admin: "Quản trị viên",
+  Staff: "Nhân viên",
+  Member: "Thành viên",
+  RegisteredUser: "Người dùng đã đăng ký",
+  Unknown: "Không rõ",
+};
+
 const backendApi = config.BACKEND_API;
 
 const UserPieChart = () => {
@@ -44,7 +52,7 @@ const UserPieChart = () => {
 
         // Chuyển sang dạng array cho PieChart
         const chartData = Object.keys(countByRole).map((role) => ({
-          name: role,
+          name: roleToVietnamese[role] || role,
           value: countByRole[role],
         }));
 
@@ -58,7 +66,7 @@ const UserPieChart = () => {
   }, []);
 
   return (
-    <div className="w-full max-w-[600px] h-[300px] p-4 bg-white rounded-2xl shadow">
+    <div className="w-full max-w-[600px] h-[400px] p-4 bg-white rounded-2xl shadow">
       <h2 className="text-lg font-semibold mb-4 text-black">
         Các người dùng của hệ thống
       </h2>
