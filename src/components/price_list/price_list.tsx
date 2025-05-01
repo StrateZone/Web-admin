@@ -250,7 +250,12 @@ const ServicePricesList = () => {
             <Input
               type="number"
               value={newPrice}
-              onChange={(e) => setNewPrice(Number(e.target.value))}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                if (value >= 0 || e.target.value === "") {
+                  setNewPrice(value);
+                }
+              }}
               className="border p-2 rounded"
               placeholder="Nhập giá"
               crossOrigin=""

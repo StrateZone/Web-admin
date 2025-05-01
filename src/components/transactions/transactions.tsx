@@ -28,7 +28,7 @@ const TABS = [
     value: "user",
   },
   {
-    label: "Của Câu Lạc Bộ",
+    label: "Của hệ thống",
     value: "system",
   },
 ];
