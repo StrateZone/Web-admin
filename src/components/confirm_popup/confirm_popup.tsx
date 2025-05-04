@@ -14,6 +14,7 @@ interface ConfirmPopupProps {
   title: string;
   message: string;
   confirmText?: string;
+  confirmDisabled?: boolean;
 }
 
 export function ConfirmPopup({
@@ -23,6 +24,7 @@ export function ConfirmPopup({
   title,
   message,
   confirmText = "Xác nhận",
+  confirmDisabled = false,
 }: ConfirmPopupProps) {
   if (!isOpen) return null; // Ẩn popup nếu không mở
 
@@ -44,10 +46,18 @@ export function ConfirmPopup({
                 {message}
               </Typography>
               <div className="mt-6 flex justify-center gap-4">
-                <Button color="red" onClick={onConfirm}>
+                <Button
+                  color="green"
+                  onClick={onConfirm}
+                  disabled={confirmDisabled}
+                >
                   {confirmText}
                 </Button>
-                <Button color="gray" variant="outlined" onClick={onClose}>
+                <Button
+                  color="red"
+                  onClick={onClose}
+                  disabled={confirmDisabled}
+                >
                   Hủy bỏ
                 </Button>
               </div>

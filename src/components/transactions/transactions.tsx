@@ -127,7 +127,7 @@ export default function Transactions() {
       }
     } catch (error) {
       if (!axios.isCancel(error)) {
-        console.error("Failed to fetch transactions:", error);
+        setIsEmpty(true);
       }
     } finally {
       if (requestId === latestRequestId) {
@@ -159,12 +159,6 @@ export default function Transactions() {
                   Các giao dịch trong hệ thống
                 </Typography>
               </div>
-              {/* <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                <Button className="flex items-center gap-3" size="sm">
-                  <UserPlusIcon strokeWidth={2} className="h-4 w-4" />
-                  Thêm chi phí của clb
-                </Button>
-              </div> */}
             </div>
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               <Tabs
