@@ -6,7 +6,7 @@ import { MdDashboard } from "react-icons/md";
 import { CiCalendar } from "react-icons/ci";
 import { BsFileEarmarkPost } from "react-icons/bs";
 import { GrSystem, GrTransaction } from "react-icons/gr";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaRegUser } from "react-icons/fa";
 
 type SidebarProps = {
   activeTab: string;
@@ -45,6 +45,11 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     {
       title: "Quản lý phòng",
       icon: () => <MdOutlineSensorDoor />,
+      roles: ["Admin"],
+    },
+    {
+      title: "Quản lý người dùng",
+      icon: () => <FaRegUser />,
       roles: ["Admin"],
     },
     {
