@@ -41,11 +41,11 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const gameTypeTranslations: Record<string, string> = {
-    chess: "Cờ vua",
-    xiangqi: "Cờ tướng",
-    go: "Cờ vây",
-  };
+  // const gameTypeTranslations: Record<string, string> = {
+  //   chess: "Cờ vua",
+  //   xiangqi: "Cờ tướng",
+  //   go: "Cờ vây",
+  // };
 
   // Hàm lấy màu sắc của trạng thái
   const getStatusColor = (status: string) => {
@@ -142,8 +142,7 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
   const getGameTypeName = (gameTypeId: number) => {
     const gameType = gameTypes.find((type) => type.typeId === gameTypeId);
     if (gameType) {
-      const gameTypeName =
-        gameTypeTranslations[gameType.typeName] || gameType.typeName; // Dịch tên loại game
+      const gameTypeName = gameType.typeName || gameType.typeName; // Dịch tên loại game
       return gameTypeName;
     }
     return "Chưa có loại game";
@@ -172,6 +171,9 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-gray-800">{room.roomName}</h1>
+          <p className="text-lg text-gray-600 mt-2 whitespace-pre-line">
+            Phòng {room.type}
+          </p>
           <p className="text-lg text-gray-600 mt-2 whitespace-pre-line">
             {room.description}
           </p>
@@ -207,7 +209,7 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
                 >
                   {gameTypes.map((type) => (
                     <option key={type.typeId} value={type.typeId}>
-                      {gameTypeTranslations[type.typeName]}
+                      {type.typeName}
                     </option>
                   ))}
                 </select>

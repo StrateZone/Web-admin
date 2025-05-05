@@ -1,4 +1,5 @@
 import {
+  Button,
   Card,
   CardBody,
   CardHeader,
@@ -12,6 +13,7 @@ import RoomCard from "./room_card";
 import { DefaultPagination } from "../pagination/pagination";
 import axios from "axios";
 import { config } from "../../../config";
+import AddRoomPopup from "./add_room_form";
 
 interface Room {
   roomId: number;
@@ -28,6 +30,7 @@ export default function RoomList() {
   const backendApi = config.BACKEND_API;
   const [rooms, setRooms] = useState<Room[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+  const [showAddRoomPopup, setShowAddRoomPopup] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,6 +101,17 @@ export default function RoomList() {
             Danh sách phòng
           </Typography>
         </CardHeader>
+
+        {!selectedRoomId && (
+          <Button
+            color="blue"
+            className="text-white "
+            onClick={() => setShowAddRoomPopup(true)}
+          >
+            Thêm phòng
+          </Button>
+        )}
+
         <CardBody>
           {loading ? (
             <div className="flex justify-center items-center min-h-[200px]">
@@ -149,6 +163,12 @@ export default function RoomList() {
           </div>
         )}
       </Card>
+      {showAddRoomPopup && (
+        <AddRoomPopup
+          onClose={() => setShowAddRoomPopup(false)}
+          onSuccess={() => fetchRooms()}
+        />
+      )}
     </div>
   );
 }

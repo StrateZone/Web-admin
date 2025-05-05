@@ -545,6 +545,9 @@ export default function Appointments() {
                     <div key={table.id} className="mt-2 p-2 border rounded-md">
                       <Typography>Bàn số: {table.tableId}</Typography>
                       <Typography>Phòng: {table.table.roomName}</Typography>
+                      <Typography>
+                        Loại cờ: {table.table.gameType.typeName}
+                      </Typography>
                       <Chip
                         variant="gradient"
                         color={(statusColors[table.status] as color) || "gray"}

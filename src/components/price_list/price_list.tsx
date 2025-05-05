@@ -35,8 +35,38 @@ const ServicePricesList = () => {
   const [newPrice, setNewPrice] = useState<number | string>("");
   const [openDialog, setOpenDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [gameTypes, setGameTypes] = useState<{ [key: number]: string }>({});
+  const [roomTypes, setRoomTypes] = useState<{ [key: number]: string }>({});
 
   const backendApi = config.BACKEND_API;
+
+  useEffect(() => {
+    const fetchTypeMappings = async () => {
+      try {
+        const [gameTypeRes, roomTypeRes] = await Promise.all([
+          axios.get(`${backendApi}/game_types/all-admin`),
+          axios.get<string[]>(`${backendApi}/rooms/roomtypes`),
+        ]);
+
+        const gameTypeMap: { [key: number]: string } = {};
+        gameTypeRes.data.forEach((item: any) => {
+          gameTypeMap[item.typeId] = item.typeName;
+        });
+
+        const roomTypeMap: { [key: number]: string } = {};
+        roomTypeRes.data.forEach((name: string, idx: number) => {
+          roomTypeMap[idx + 1] = name;
+        });
+
+        setGameTypes(gameTypeMap);
+        setRoomTypes(roomTypeMap);
+      } catch (err) {
+        console.error("Lỗi khi tải game types / room types:", err);
+      }
+    };
+
+    fetchTypeMappings();
+  }, []);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -61,18 +91,11 @@ const ServicePricesList = () => {
   }, []);
 
   const formatServiceName = (service: any) => {
-    if (service.memberFee) {
-      return "Phí hội viên"; // Hiển thị nếu là gói hội viên
-    }
-    if (service.gameTypeId !== null) {
-      return gameTypeNames[service.gameTypeId] || "Dịch vụ khác";
-    }
-    if (service.roomType !== null) {
-      return roomTypeNames[service.roomType] || "Phòng khác";
-    }
-    if (service.teachingSalary) {
-      return "Lương giảng dạy";
-    }
+    if (service.memberFee) return "Phí hội viên";
+    if (service.gameTypeId !== null)
+      return gameTypes[service.gameTypeId] || "Dịch vụ khác";
+    if (service.roomType !== null) return service.roomType || "Phòng khác";
+    if (service.teachingSalary) return "Lương giảng dạy";
     return "Dịch vụ khác";
   };
 
