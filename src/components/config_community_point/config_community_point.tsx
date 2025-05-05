@@ -13,16 +13,22 @@ import { AiOutlineEdit } from "react-icons/ai";
 export type SystemConfig = {
   id: number;
   adminId: number;
-  openTime: string;
-  closeTime: string;
-  appointment_Refund100_HoursFromScheduleTime: number;
-  appointment_Incoming_HoursFromScheduleTime: number;
-  appointment_Checkin_MinutesFromScheduleTime: number;
-  max_NumberOfTables_CancelPerWeek: number;
-  contributionPoints_PerThread: number;
-  contributionPoints_PerComment: number;
-  userPoints_PerCheckinTable_ByPercentageOfTablesPrice: number;
-  status: string;
+  openTime: string; // dạng "HH:mm:ss"
+  closeTime: string; // dạng "HH:mm:ss"
+  appointment_Refund100_HoursFromScheduleTime: number; // số thực (có thể có .5)
+  appointment_Incoming_HoursFromScheduleTime: number; // số thực
+  appointment_Checkin_MinutesFromScheduleTime: number; // phút, số nguyên
+  max_NumberOfTables_CancelPerWeek: number; // số nguyên
+  contributionPoints_PerThread: number; // điểm
+  contributionPoints_PerComment: number; // điểm
+  userPoints_PerCheckinTable_ByPercentageOfTablesPrice: number; // tỷ lệ (0.002 = 0.2%)
+  numberof_TopContributors_PerWeek: number;
+  max_NumberOfUsers_InvitedToTable: number;
+  appointmentRequest_MaxHours_UntilExpiration: number;
+  appointmentRequest_MinHours_UntilExpiration: number;
+  percentageRefund_IfNot100: number;
+  percentageTimeRange_UntilRequestExpiration: number;
+  status: string; //status
 };
 
 interface ConfigCommunityPointProps {
@@ -39,6 +45,8 @@ export default function ConfigCommunityPoint({
   const [pointPerThread, setPointPerThread] = useState<number>(0);
   const [pointPerComment, setPointPerComment] = useState<number>(0);
   const [percentCheckinReward, setPercentCheckinReward] = useState<number>(0);
+  const [numberOfTopContributor, setNumberOfTopContributor] =
+    useState<number>(0);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -51,16 +59,42 @@ export default function ConfigCommunityPoint({
         (systemConfigData.userPoints_PerCheckinTable_ByPercentageOfTablesPrice ??
           0) * 100,
       ); // đổi thành % cho dễ nhập
+      setNumberOfTopContributor(
+        systemConfigData.numberof_TopContributors_PerWeek ?? 0,
+      );
     }
   }, [systemConfigData]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await axios.put(`${backendApi}/system/1/points-rules`, {
+      await axios.put(`${backendApi}/system/1`, {
+        id: systemConfigData?.id,
+        adminId: systemConfigData?.adminId,
+        openTime: systemConfigData?.openTime,
+        closeTime: systemConfigData?.closeTime,
+        appointment_Refund100_HoursFromScheduleTime:
+          systemConfigData?.appointment_Refund100_HoursFromScheduleTime,
+        appointment_Incoming_HoursFromScheduleTime:
+          systemConfigData?.appointment_Incoming_HoursFromScheduleTime,
+        appointment_Checkin_MinutesFromScheduleTime:
+          systemConfigData?.appointment_Checkin_MinutesFromScheduleTime,
+        max_NumberOfTables_CancelPerWeek:
+          systemConfigData?.max_NumberOfTables_CancelPerWeek,
+
         contributionPoints_PerThread: pointPerThread,
         contributionPoints_PerComment: pointPerComment,
-        userPoints_By_TablePricePercentage: percentCheckinReward / 100, // đổi về dạng 0.002
+        userPoints_PerCheckinTable_ByPercentageOfTablesPrice:
+          percentCheckinReward / 100, // đổi về dạng 0.002
+        numberof_TopContributors_PerWeek: numberOfTopContributor,
+
+        max_NumberOfUsers_InvitedToTable:
+          systemConfigData?.max_NumberOfUsers_InvitedToTable,
+        appointmentRequest_MaxHours_UntilExpiration:
+          systemConfigData?.appointmentRequest_MaxHours_UntilExpiration,
+        appointmentRequest_MinHours_UntilExpiration:
+          systemConfigData?.appointmentRequest_MinHours_UntilExpiration,
+        status: systemConfigData?.status,
       });
       console.log("Cập nhật thành công!");
       setIsEditing(false);
@@ -163,6 +197,30 @@ export default function ConfigCommunityPoint({
                     const value = Number(e.target.value);
                     if (value >= 0 || e.target.value === "") {
                       setPercentCheckinReward(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Số người trong top nhận được danh hiệu Top Contributor
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {numberOfTopContributor} người
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  step="0.01"
+                  className="w-full p-2 border rounded"
+                  value={numberOfTopContributor}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setNumberOfTopContributor(Number(e.target.value));
                     }
                   }}
                 />
