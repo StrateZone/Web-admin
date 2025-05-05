@@ -13,6 +13,11 @@ interface RoomCardProps {
   room: Room;
   onSelect: () => void;
 }
+const statusMap: Record<string, string> = {
+  available: "Đang mở",
+  unavailable: "Không khả dụng",
+  closed: "Đã đóng",
+};
 
 export default function RoomCard({ room, onSelect }: RoomCardProps) {
   return (
@@ -22,7 +27,7 @@ export default function RoomCard({ room, onSelect }: RoomCardProps) {
     >
       <h2 className="text-xl font-bold">{room.roomName}</h2>
       <p className="text-sm text-gray-500">
-        {room.type.toUpperCase()} - {room.status}
+        {room.type} - {statusMap[room.status] || "Không xác định"}
       </p>
     </div>
   );

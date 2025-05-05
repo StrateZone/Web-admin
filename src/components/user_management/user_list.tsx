@@ -382,15 +382,13 @@ const UserCardList: React.FC = () => {
                       {(() => {
                         const { label, color } = getStatusInfo(user.status);
                         return (
-                          <p className="flex items-center gap-2">
-                            <Chip
-                              size="sm"
-                              color={color as any}
-                              variant="filled"
-                              value={label}
-                              className="text-[10px] px-2 py-0.5"
-                            />
-                          </p>
+                          <Chip
+                            size="sm"
+                            color={color as any}
+                            variant="filled"
+                            value={label}
+                            className="text-[10px] px-2 py-0.5 w-full max-w-[107px]"
+                          />
                         );
                       })()}
                     </CardBody>
@@ -412,19 +410,22 @@ const UserCardList: React.FC = () => {
                       )}
 
                       {(user.status === "Active" ||
-                        user.status === "Unactivated") && (
-                        <Button
-                          size="sm"
-                          className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1"
-                          onClick={() => confirmStatusChange(user, "Suspended")}
-                          disabled={isChangingStatus}
-                        >
-                          {isChangingStatus &&
-                          selectedUser?.userId === user.userId
-                            ? "Đang xử lý..."
-                            : "Vô hiệu hóa"}
-                        </Button>
-                      )}
+                        user.status === "Unactivated") &&
+                        user.userRole !== "Admin" && (
+                          <Button
+                            size="sm"
+                            className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1"
+                            onClick={() =>
+                              confirmStatusChange(user, "Suspended")
+                            }
+                            disabled={isChangingStatus}
+                          >
+                            {isChangingStatus &&
+                            selectedUser?.userId === user.userId
+                              ? "Đang xử lý..."
+                              : "Vô hiệu hóa"}
+                          </Button>
+                        )}
                       {user.status === "Suspended" && (
                         <Button
                           size="sm"
