@@ -22,6 +22,12 @@ export type SystemConfig = {
   contributionPoints_PerThread: number; // điểm
   contributionPoints_PerComment: number; // điểm
   userPoints_PerCheckinTable_ByPercentageOfTablesPrice: number; // tỷ lệ (0.002 = 0.2%)
+  numberof_TopContributors_PerWeek: number;
+  max_NumberOfUsers_InvitedToTable: number;
+  appointmentRequest_MaxHours_UntilExpiration: number;
+  appointmentRequest_MinHours_UntilExpiration: number;
+  percentageRefund_IfNot100: number;
+  percentageTimeRange_UntilRequestExpiration: number;
   status: string; //status
 };
 
@@ -40,6 +46,11 @@ export default function CancelPolicyConfig({
   const [incomingHour, setIncomingHour] = useState<number>(0);
   const [checkinMinutes, setCheckinMinutes] = useState<number>(0);
   const [maxCancelPerWeek, setMaxCancelPerWeek] = useState<number>(0);
+  const [maxInvitation, setMaxInvitation] = useState<number>(0);
+  const [maxInvitationExpiry, setMaxInvitationExpiry] = useState<number>(0);
+  const [minInvitationExpiry, setMinInvitationExpiry] = useState<number>(0);
+  const [refundOtherThan100, setRefundOtherThan100] = useState<number>(0);
+  const [invitaionExpiry, setInvitaionExpiry] = useState<number>(0);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -58,19 +69,50 @@ export default function CancelPolicyConfig({
       setMaxCancelPerWeek(
         systemConfigData.max_NumberOfTables_CancelPerWeek ?? 0,
       );
+      setMaxInvitation(systemConfigData.max_NumberOfUsers_InvitedToTable ?? 0);
+      setMaxInvitationExpiry(
+        systemConfigData.appointmentRequest_MaxHours_UntilExpiration ?? 0,
+      );
+      setMinInvitationExpiry(
+        systemConfigData.appointmentRequest_MinHours_UntilExpiration ?? 0,
+      );
+      setRefundOtherThan100(
+        (systemConfigData.percentageRefund_IfNot100 ?? 0) * 100,
+      );
+      setInvitaionExpiry(
+        (systemConfigData.percentageTimeRange_UntilRequestExpiration ?? 0) *
+          100,
+      );
     }
   }, [systemConfigData]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await axios.put(`${backendApi}/system/1/appointment-time-rules`, {
-        refund100_Hours_BeforeScheduleTime: refundHour,
-        incoming_Hours_BeforeScheduleTime: incomingHour,
-        checkin_Minutes_BeforeScheduleTime: checkinMinutes,
-        maxTablesCancel_PerWeek: maxCancelPerWeek,
+      await axios.put(`${backendApi}/system/1`, {
+        id: systemConfigData?.id,
+        adminId: systemConfigData?.adminId,
+        openTime: systemConfigData?.openTime,
+        closeTime: systemConfigData?.closeTime,
+        appointment_Refund100_HoursFromScheduleTime: refundHour,
+        appointment_Incoming_HoursFromScheduleTime: incomingHour,
+        appointment_Checkin_MinutesFromScheduleTime: checkinMinutes,
+        max_NumberOfTables_CancelPerWeek: maxCancelPerWeek,
+        contributionPoints_PerThread:
+          systemConfigData?.contributionPoints_PerThread,
+        contributionPoints_PerComment:
+          systemConfigData?.contributionPoints_PerComment,
+        userPoints_PerCheckinTable_ByPercentageOfTablesPrice:
+          systemConfigData?.userPoints_PerCheckinTable_ByPercentageOfTablesPrice,
+        numberof_TopContributors_PerWeek:
+          systemConfigData?.numberof_TopContributors_PerWeek,
+        max_NumberOfUsers_InvitedToTable: maxInvitation,
+        appointmentRequest_MaxHours_UntilExpiration: maxInvitationExpiry,
+        appointmentRequest_MinHours_UntilExpiration: minInvitationExpiry,
+        percentageRefund_IfNot100: refundOtherThan100 / 100,
+        percentageTimeRange_UntilRequestExpiration: invitaionExpiry / 100,
+        status: systemConfigData?.status,
       });
-      console.log("Cập nhật chính sách thành công!");
       setIsEditing(false);
       // Optionally, bạn có thể trigger re-fetch ở component cha
     } catch (error) {
@@ -117,7 +159,7 @@ export default function CancelPolicyConfig({
           <div className="space-y-6">
             <div>
               <Typography variant="small" color="blue-gray" className="mb-2">
-                Hoàn tiền 100% trước (giờ)
+                Hoàn tiền 100% trước
               </Typography>
               {!isEditing ? (
                 <Typography className="text-lg font-semibold">
@@ -128,14 +170,20 @@ export default function CancelPolicyConfig({
                   type="number"
                   className="w-full p-2 border rounded"
                   value={refundHour}
-                  onChange={(e) => setRefundHour(Number(e.target.value))}
+                  placeholder="Tiếng"
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setRefundHour(Number(e.target.value));
+                    }
+                  }}
                 />
               )}
             </div>
 
             <div>
               <Typography variant="small" color="blue-gray" className="mb-2">
-                Chuyển trạng thái sắp diễn ra trước (giờ)
+                Chuyển trạng thái sắp diễn ra trước
               </Typography>
               {!isEditing ? (
                 <Typography className="text-lg font-semibold">
@@ -145,6 +193,7 @@ export default function CancelPolicyConfig({
                 <input
                   type="number"
                   className="w-full p-2 border rounded"
+                  placeholder="Tiếng"
                   value={incomingHour}
                   onChange={(e) => {
                     const value = Number(e.target.value);
@@ -168,6 +217,7 @@ export default function CancelPolicyConfig({
                 <input
                   type="number"
                   className="w-full p-2 border rounded"
+                  placeholder="Phút"
                   value={checkinMinutes}
                   onChange={(e) => {
                     const value = Number(e.target.value);
@@ -196,6 +246,126 @@ export default function CancelPolicyConfig({
                     const value = Number(e.target.value);
                     if (value >= 0 || e.target.value === "") {
                       setMaxCancelPerWeek(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Số lời mời tối đa được gửi khi mời chơi cờ
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {maxInvitation} lời mời
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  className="w-full p-2 border rounded"
+                  value={maxInvitation}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setMaxInvitation(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Thời gian lời mời hết hạn tối đa (tiếng)
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {maxInvitationExpiry} tiếng
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  className="w-full p-2 border rounded"
+                  value={maxInvitationExpiry}
+                  placeholder="Tiếng"
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setMaxInvitationExpiry(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Thời gian lời mời hết hạn tối thiểu
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {minInvitationExpiry} tiếng
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  className="w-full p-2 border rounded"
+                  value={minInvitationExpiry}
+                  placeholder="Tiếng"
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setMinInvitationExpiry(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Thời gian lời mời hết hạn
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {invitaionExpiry} % khoảng thời gian từ lúc bắt đầu đến giờ
+                  chơi
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  className="w-full p-2 border rounded"
+                  value={invitaionExpiry}
+                  placeholder="%"
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setInvitaionExpiry(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Lượng refund nếu qua mốc thời gian refund 100%
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {refundOtherThan100} %
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  className="w-full p-2 border rounded"
+                  value={refundOtherThan100}
+                  placeholder="%"
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setRefundOtherThan100(Number(e.target.value));
                     }
                   }}
                 />

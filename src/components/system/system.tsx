@@ -26,6 +26,12 @@ export type SystemConfig = {
   contributionPoints_PerThread: number; // điểm
   contributionPoints_PerComment: number; // điểm
   userPoints_PerCheckinTable_ByPercentageOfTablesPrice: number; // tỷ lệ (0.002 = 0.2%)
+  numberof_TopContributors_PerWeek: number;
+  appointmentRequest_MaxHours_UntilExpiration: number;
+  appointmentRequest_MinHours_UntilExpiration: number;
+  max_NumberOfUsers_InvitedToTable: number;
+  percentageRefund_IfNot100: number;
+  percentageTimeRange_UntilRequestExpiration: number;
   status: string; //status
 };
 
