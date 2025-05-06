@@ -522,7 +522,7 @@ export default function Appointments() {
                 <DialogHeader>
                   Chi tiết lịch hẹn {appointmentDetails.appointmentId}
                 </DialogHeader>
-                <DialogBody>
+                <DialogBody className="max-h-[80vh] overflow-y-auto ">
                   <Typography>
                     Tổng giá:{" "}
                     {appointmentDetails.totalPrice.toLocaleString("vi-VN", {
@@ -542,7 +542,10 @@ export default function Appointments() {
 
                   <Typography className="mt-4">Các bàn:</Typography>
                   {appointmentDetails.tablesAppointments?.map((table: any) => (
-                    <div key={table.id} className="mt-2 p-2 border rounded-md">
+                    <div
+                      key={table.id}
+                      className="mt-2 p-2 border-2 border-gray-400 rounded-md"
+                    >
                       <Typography>Bàn số: {table.tableId}</Typography>
                       <Typography>Phòng: {table.table.roomName}</Typography>
                       <Typography>

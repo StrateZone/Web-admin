@@ -33,8 +33,6 @@ export default function TabContent({
         return <Transactions />;
       case "Hệ Thống":
         return <System />;
-      case "Điểm Danh":
-        return <Checkin />;
       case "Quản lý phòng":
         return <RoomManagement />;
       case "Quản lý người dùng":

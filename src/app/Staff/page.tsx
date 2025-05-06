@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 export default function Page() {
-  const [activeTab, setActiveTab] = useState("Điểm Danh");
+  const [activeTab, setActiveTab] = useState("Cuộc Hẹn");
   const [isAuthorized, setIsAuthorized] = useState(false);
   const router = useRouter();
 
