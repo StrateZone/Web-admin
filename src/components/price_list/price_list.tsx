@@ -110,6 +110,7 @@ const ServicePricesList = () => {
         await axios.put(`${backendApi}/prices/${selectedService.id}`, {
           price1: newPrice,
           unit: selectedService.unit,
+          type: selectedService.type,
         });
         const updatedServices = services.map((service) =>
           service.id === selectedService.id
