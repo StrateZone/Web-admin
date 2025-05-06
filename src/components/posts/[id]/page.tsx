@@ -4,7 +4,13 @@ import DOMPurify from "dompurify";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CommentList from "@/components/comment_list";
-import { Card, CardBody, Tab, Tabs } from "@material-tailwind/react";
+import {
+  Card,
+  CardBody,
+  Tab,
+  Tabs,
+  Typography,
+} from "@material-tailwind/react";
 import TabContent from "@/components/sidebar/tab_content";
 import { TabsContext } from "@material-tailwind/react/components/Tabs/TabsContext";
 
@@ -279,12 +285,15 @@ export default function PostDetail({
       />
 
       {post.comments?.length > 0 && (
-        <Card>
-          <CardBody>
-            {/* Comment section được tách riêng */}
-            <CommentList comments={post.comments} />
-          </CardBody>
-        </Card>
+        <>
+          <Typography>Bình Luận</Typography>
+          <Card>
+            <CardBody>
+              {/* Comment section được tách riêng */}
+              <CommentList comments={post.comments} />
+            </CardBody>
+          </Card>
+        </>
       )}
     </div>
   );
