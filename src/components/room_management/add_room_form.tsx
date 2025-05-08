@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { config } from "../../../config";
 import { Button, Typography } from "@material-tailwind/react";
 import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 
 function AddRoomPopup({
   onClose,
@@ -24,7 +25,7 @@ function AddRoomPopup({
   useEffect(() => {
     const fetchRoomTypes = async () => {
       try {
-        const res = await axios.get(`${backendApi}/rooms/roomtypes`);
+        const res = await axiosInstance.get(`${backendApi}/rooms/roomtypes`);
         setRoomTypes(res.data);
       } catch (err) {
         console.error("Không thể tải danh sách loại phòng:", err);
@@ -48,7 +49,7 @@ function AddRoomPopup({
 
   const handleSubmit = async () => {
     try {
-      await axios.post(`${backendApi}/rooms`, formData);
+      await axiosInstance.post(`${backendApi}/rooms`, formData);
       onSuccess(); // Refresh list
       onClose(); // Close popup
     } catch (err) {

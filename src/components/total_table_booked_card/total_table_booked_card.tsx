@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { CalendarCheck } from "lucide-react";
+import axiosInstance from "@/utils/axiosInstance";
+import { config } from "../../../config";
 
 interface Props {
   year: number;
@@ -10,14 +12,15 @@ interface Props {
 const TableBookingsCard: React.FC<Props> = ({ year, month }) => {
   const [bookings, setBookings] = useState<number | null>(null);
 
+  const backendApi = config.BACKEND_API;
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchBookings = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get(
-          `https://backend-production-ac5e.up.railway.app/api/analytics/tables-appointment-report/year/${year}/month/${month}`,
+        const res = await axiosInstance.get(
+          `${backendApi}/analytics/tables-appointment-report/year/${year}/month/${month}`,
         );
         setBookings(res.data.tablesAppointmentBooked);
       } catch (error) {

@@ -22,6 +22,7 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import ConfirmPopup from "../confirm_popup/confirm_popup";
+import axiosInstance from "@/utils/axiosInstance";
 
 interface User {
   userId: number;
@@ -92,7 +93,9 @@ const UserCardList: React.FC = () => {
     if (!selectedUser?.userId) return;
     setIsKicking(true);
     try {
-      await axios.put(`${backendApi}/users/kick/${selectedUser?.userId}`);
+      await axiosInstance.put(
+        `${backendApi}/users/kick/${selectedUser?.userId}`,
+      );
       fetchUsers();
     } catch (error) {
       console.error("Lỗi khi kick người dùng:", error);
@@ -118,14 +121,17 @@ const UserCardList: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${backendApi}/users/all/management`, {
-        params: {
-          "page-number": page,
-          "page-size": 9,
-          Type: selectedType,
-          ...(debouncedSearchValue && { SearchValue: debouncedSearchValue }),
+      const res = await axiosInstance.get(
+        `${backendApi}/users/all/management`,
+        {
+          params: {
+            "page-number": page,
+            "page-size": 9,
+            Type: selectedType,
+            ...(debouncedSearchValue && { SearchValue: debouncedSearchValue }),
+          },
         },
-      });
+      );
       const data = res.data.pagedList.map((u: any) => ({
         userId: u.userId,
         username: u.username,
@@ -178,17 +184,19 @@ const UserCardList: React.FC = () => {
     try {
       if (newStatus === "Suspended") {
         // Gọi API riêng khi suspend
-        await axios.put(`${backendApi}/users/suspend/${selectedUser.userId}`);
+        await axiosInstance.put(
+          `${backendApi}/users/suspend/${selectedUser.userId}`,
+        );
       } else if (newStatus === "Active" && selectedUser.userRole === "Member") {
         // Các trường hợp dùng API thông thường
-        await axios.put(`${backendApi}/users/${selectedUser.userId}`, {
+        await axiosInstance.put(`${backendApi}/users/${selectedUser.userId}`, {
           userId: selectedUser.userId,
           status: newStatus,
           userRole: selectedUser.userRole,
         });
       } else {
         // Các trường hợp khác dùng API thông thường
-        await axios.put(`${backendApi}/users/${selectedUser.userId}`, {
+        await axiosInstance.put(`${backendApi}/users/${selectedUser.userId}`, {
           userId: selectedUser.userId,
           status: newStatus,
         });

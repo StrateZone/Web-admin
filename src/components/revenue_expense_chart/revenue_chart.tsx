@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { config } from "../../../config";
+import axiosInstance from "@/utils/axiosInstance";
 
 type DayTransaction = {
   dayOfMonth: number;
@@ -40,7 +41,7 @@ const RevenueChart: React.FC<Props> = ({ year, month }) => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get(
+        const res = await axiosInstance.get(
           `${backendApi}/analytics/transaction-report/year/${year}/month/${month}`,
         );
 

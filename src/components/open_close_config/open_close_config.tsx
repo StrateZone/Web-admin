@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { AiOutlineEdit } from "react-icons/ai";
 import { config } from "../../../config";
 import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 
 export type SystemConfig = {
   id: number;
@@ -53,7 +54,7 @@ export default function OpenCloseConfig({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await axios.put(`${backendApi}/system/working-hour/1`, {
+      await axiosInstance.put(`${backendApi}/system/working-hour/1`, {
         openHour: openTime + ":00",
         closeHour: closeTime + ":00",
       });

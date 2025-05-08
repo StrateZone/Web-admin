@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { config } from "../../../config";
 import axios from "axios";
 import { AiOutlineEdit } from "react-icons/ai";
+import axiosInstance from "@/utils/axiosInstance";
 
 export type SystemConfig = {
   id: number;
@@ -68,7 +69,7 @@ export default function ConfigCommunityPoint({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await axios.put(`${backendApi}/system/1`, {
+      await axiosInstance.put(`${backendApi}/system/1`, {
         id: systemConfigData?.id,
         adminId: systemConfigData?.adminId,
         openTime: systemConfigData?.openTime,

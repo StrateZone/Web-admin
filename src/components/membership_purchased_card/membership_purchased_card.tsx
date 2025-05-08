@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { BadgeDollarSign } from "lucide-react";
+import axiosInstance from "@/utils/axiosInstance";
+import { config } from "../../../config";
 
 interface Props {
   year: number;
   month: number;
 }
 const MembershipsPurchasedCard: React.FC<Props> = ({ year, month }) => {
+  const backendApi = config.BACKEND_API;
   const [count, setCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -13,11 +16,10 @@ const MembershipsPurchasedCard: React.FC<Props> = ({ year, month }) => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(
-          `https://backend-production-ac5e.up.railway.app/api/analytics/memberships-purchased/year/${year}/month/${month}`,
+        const res = await axiosInstance.get(
+          `${backendApi}/analytics/memberships-purchased/year/${year}/month/${month}`,
         );
-        const data = await res.json();
-        setCount(data.membershipsPurchased);
+        setCount(res.data.membershipsPurchased);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu membership:", error);
       } finally {

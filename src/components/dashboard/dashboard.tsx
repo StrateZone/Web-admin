@@ -59,7 +59,7 @@ export default function Dashboard() {
 
       {/* Pie chart nhỏ */}
       <div className="mb-8 flex justify-center">
-        <div className="bg-white p-6 rounded-2xl shadow w-full max-w-[600px]">
+        <div className="bg-white p-6 rounded-2xl shadow w-full max-w-[800px]">
           <UserPieChart />
         </div>
       </div>
@@ -68,12 +68,6 @@ export default function Dashboard() {
       <div className="space-y-8">
         <div className="bg-white p-6 rounded-2xl shadow">
           <RevenueChart year={year} month={month} />
-        </div>
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <ExpenseChart year={year} month={month} />
-        </div>
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <ProfitLineChart year={year} month={month} />
         </div>
       </div>
     </div>

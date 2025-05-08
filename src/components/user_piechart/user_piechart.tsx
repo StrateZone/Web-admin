@@ -9,6 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import axiosInstance from "@/utils/axiosInstance";
 
 const COLORS = ["#4ade80", "#60a5fa", "#facc15", "#f87171", "#a78bfa"];
 type User = {
@@ -32,7 +33,9 @@ const UserPieChart = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get(`${backendApi}/users/all/dashboard`);
+        const res = await axiosInstance.get(
+          `${backendApi}/users/all/dashboard`,
+        );
         const users = res.data;
 
         // Lọc bỏ Admin và Staff
@@ -66,7 +69,7 @@ const UserPieChart = () => {
   }, []);
 
   return (
-    <div className="w-full max-w-[600px] h-[400px] p-4 bg-white rounded-2xl shadow">
+    <div className="w-full max-w-[800px] h-[400px] p-4 bg-white rounded-2xl shadow">
       <h2 className="text-lg font-semibold mb-4 text-black">
         Các người dùng của hệ thống
       </h2>

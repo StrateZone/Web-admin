@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { config } from "../../../config";
+import axiosInstance from "@/utils/axiosInstance";
 
 interface Table {
   tableId: number;
@@ -80,7 +81,7 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
     const fetchRoomDetail = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${backendApi}/rooms/${roomId}`);
+        const res = await axiosInstance.get(`${backendApi}/rooms/${roomId}`);
         setRoom(res.data);
         setTables(res.data.tables || []);
       } catch (error) {
@@ -97,7 +98,7 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
   useEffect(() => {
     const fetchGameTypes = async () => {
       try {
-        const res = await axios.get(`${backendApi}/game_types/all`);
+        const res = await axiosInstance.get(`${backendApi}/game_types/all`);
         setGameTypes(
           res.data.map((type: any) => ({
             typeId: type.typeId,
@@ -123,7 +124,7 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
     }
     setCreating(true);
     try {
-      const res = await axios.post(`${backendApi}/tables`, {
+      const res = await axiosInstance.post(`${backendApi}/tables`, {
         room_Id: room.roomId,
         gameType_Id: selectedGameTypeId,
       });

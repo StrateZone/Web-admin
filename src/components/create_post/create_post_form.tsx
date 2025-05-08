@@ -4,6 +4,7 @@ import { Card } from "@material-tailwind/react";
 import { toast } from "react-toastify";
 import { config } from "../../../config";
 import dynamic from "next/dynamic";
+import axiosInstance from "@/utils/axiosInstance";
 
 const MyQuillEditor = dynamic(
   () => import("@/components/quill_editor/quill_editor"),
@@ -40,8 +41,8 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await axios.get(
-          "https://backend-production-ac5e.up.railway.app/api/tags/by-role?role=Admin",
+        const response = await axiosInstance.get(
+          `${backendApi}/tags/by-role?role=Admin`,
         );
         setThreadTags(response.data); // Lưu các tag vào state
       } catch (err) {
@@ -78,7 +79,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({
         formData.append("Width", "0");
         formData.append("Height", "0");
 
-        await axios.post(`${backendApi}/images/upload`, formData, {
+        await axiosInstance.post(`${backendApi}/images/upload`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
             //Authorization: `Bearer ${localStorage.getItem("accessToken")}`,

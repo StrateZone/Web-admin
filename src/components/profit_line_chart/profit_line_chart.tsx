@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import axios from "axios";
 import { config } from "../../../config";
+import axiosInstance from "@/utils/axiosInstance";
 
 interface ProfitDay {
   dayOfMonth: number;
@@ -41,7 +42,7 @@ const ProfitLineChart = ({ year, month }: ProfitLineChartProps) => {
     const fetchProfitData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get<ApiResponse>(
+        const response = await axiosInstance.get<ApiResponse>(
           `${backendApi}/analytics/profit/year/${year}/month/${month}`,
         );
         const apiData = response.data;

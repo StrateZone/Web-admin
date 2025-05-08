@@ -9,6 +9,7 @@ import {
 } from "@material-tailwind/react";
 import { config } from "../../../config";
 import AddRoomTypeForm from "./add_room_type_form";
+import axiosInstance from "@/utils/axiosInstance";
 
 const RoomTypeList: React.FC = () => {
   const backendApi = config.BACKEND_API;
@@ -18,7 +19,9 @@ const RoomTypeList: React.FC = () => {
 
   const fetchRoomTypes = async () => {
     try {
-      const res = await axios.get<string[]>(`${backendApi}/rooms/roomtypes`);
+      const res = await axiosInstance.get<string[]>(
+        `${backendApi}/rooms/roomtypes`,
+      );
       setRoomTypes(res.data);
     } catch (error) {
       console.error("Lỗi khi tải room types:", error);

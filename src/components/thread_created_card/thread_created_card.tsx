@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { MessageSquareText } from "lucide-react";
+import axiosInstance from "@/utils/axiosInstance";
+import { config } from "../../../config";
 
 interface Props {
   year: number;
@@ -9,16 +11,16 @@ interface Props {
 const ThreadsCreatedCard: React.FC<Props> = ({ year, month }) => {
   const [threadsData, setThreadsData] = useState<number | null>(null);
 
+  const backendApi = config.BACKEND_API;
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchThreadsData = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `https://backend-production-ac5e.up.railway.app/api/analytics/threads-report/year/${year}/month/${month}`,
+      const res = await axiosInstance.get(
+        `${backendApi}/analytics/threads-report/year/${year}/month/${month}`,
       );
-      const data = await res.json();
-      setThreadsData(data.threadsCreated);
+      setThreadsData(res.data.threadsCreated);
     } catch (error) {
       console.error("Lỗi khi fetch dữ liệu bài viết:", error);
     } finally {

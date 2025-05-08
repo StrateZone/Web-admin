@@ -8,6 +8,8 @@ import {
 } from "@material-tailwind/react";
 import React, { useState } from "react";
 import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
+import { config } from "../../../config";
 
 interface AddGameTypeFormProps {
   isOpen: boolean;
@@ -20,6 +22,7 @@ const AddGameTypeForm: React.FC<AddGameTypeFormProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const backendApi = config.BACKEND_API;
   const [typeName, setTypeName] = useState("");
   const [pricePerHour, setPricePerHour] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -28,13 +31,10 @@ const AddGameTypeForm: React.FC<AddGameTypeFormProps> = ({
     if (!typeName) return alert("Tên loại cờ không được để trống!");
     setLoading(true);
     try {
-      await axios.post(
-        "https://backend-production-ac5e.up.railway.app/api/game_types",
-        {
-          typeName,
-          pricePerHour,
-        },
-      );
+      await axiosInstance.post(`${backendApi}/game_types`, {
+        typeName,
+        pricePerHour,
+      });
       onSuccess();
       onClose();
       setTypeName("");

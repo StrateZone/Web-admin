@@ -20,6 +20,7 @@ import { color } from "@material-tailwind/react/types/components/alert";
 import { GoArrowDownRight, GoArrowUpRight } from "react-icons/go";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { config } from "../../../config";
+import axiosInstance from "@/utils/axiosInstance";
 
 type AppointmentData = {
   appointmentId: number;
@@ -71,7 +72,7 @@ export default function Appointments() {
   useEffect(() => {
     const fetchMinutesBeforeSchedule = async () => {
       try {
-        const response = await axios.get(
+        const response = await axiosInstance.get(
           `${backendApi}/system/1/check-in/minutes-before-schedule`,
         );
         setMinutesBeforeSchedule(response.data); // response trả về 1 số phút
@@ -116,18 +117,21 @@ export default function Appointments() {
 
     setLoading(true);
     try {
-      const response = await axios.get(`${backendApi}/appointments/all/admin`, {
-        signal: controller.signal,
-        params: {
-          "page-number": currentPage,
-          "page-size": 10,
-          ...(appointmentStatus && { Status: appointmentStatus }),
-          ...(orderBy && { "order-by": orderBy }),
-          ...(debouncedSearchValue && {
-            SearchValue: encodeURIComponent(debouncedSearchValue),
-          }),
+      const response = await axiosInstance.get(
+        `${backendApi}/appointments/all/admin`,
+        {
+          signal: controller.signal,
+          params: {
+            "page-number": currentPage,
+            "page-size": 10,
+            ...(appointmentStatus && { Status: appointmentStatus }),
+            ...(orderBy && { "order-by": orderBy }),
+            ...(debouncedSearchValue && {
+              SearchValue: encodeURIComponent(debouncedSearchValue),
+            }),
+          },
         },
-      });
+      );
 
       // Chỉ xử lý nếu là request mới nhất
       if (requestId === latestRequestId) {
@@ -154,7 +158,7 @@ export default function Appointments() {
 
   const fetchAppointmentDetails = async () => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${backendApi}/appointments/${clickedAppointmentId}`,
       );
       setAppointmentDetails(response.data);
@@ -215,7 +219,7 @@ export default function Appointments() {
     if (!selectedTableAppointmentId || !selectedUserId) return;
 
     try {
-      await axios.put(
+      await axiosInstance.put(
         `${backendApi}/appointments/cancel/admin?tableAppointmentId=${selectedTableAppointmentId}&userId=${selectedUserId}`,
       );
 
@@ -256,7 +260,7 @@ export default function Appointments() {
     if (!selectedTableAppointmentId || !selectedTableAppointmentUserId) return;
 
     try {
-      await axios.put(
+      await axiosInstance.put(
         `${backendApi}/tables-appointment/check-in/${selectedTableAppointmentId}/users/${selectedTableAppointmentUserId}`,
       );
 
@@ -283,7 +287,7 @@ export default function Appointments() {
     if (!selectedTableAppointmentId || !selectedTableAppointmentUserId) return;
 
     try {
-      await axios.put(
+      await axiosInstance.put(
         `${backendApi}/tables-appointment/check-out/${selectedTableAppointmentId}/users/${selectedTableAppointmentUserId}`,
       );
 
@@ -599,7 +603,7 @@ export default function Appointments() {
                                 table.id,
                                 appointmentDetails.userId,
                                 {
-                                  tableId: table.id,
+                                  tableId: table.tableId,
                                   roomName: table.table.roomName,
                                   roomType: table.table.roomType,
                                   scheduleTime: new Date(

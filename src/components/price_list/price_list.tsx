@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from "@material-tailwind/react";
 import { config } from "../../../config";
+import axiosInstance from "@/utils/axiosInstance";
 
 const gameTypeNames: { [key: number]: string } = {
   1: "Cờ vua",
@@ -44,8 +45,8 @@ const ServicePricesList = () => {
     const fetchTypeMappings = async () => {
       try {
         const [gameTypeRes, roomTypeRes] = await Promise.all([
-          axios.get(`${backendApi}/game_types/all-admin`),
-          axios.get<string[]>(`${backendApi}/rooms/roomtypes`),
+          axiosInstance.get(`${backendApi}/game_types/all-admin`),
+          axiosInstance.get<string[]>(`${backendApi}/rooms/roomtypes`),
         ]);
 
         const gameTypeMap: { [key: number]: string } = {};
@@ -73,12 +74,15 @@ const ServicePricesList = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${backendApi}/prices/services`, {
-          params: {
-            "page-number": 1,
-            "page-size": 10,
+        const response = await axiosInstance.get(
+          `${backendApi}/prices/services`,
+          {
+            params: {
+              "page-number": 1,
+              "page-size": 10,
+            },
           },
-        });
+        );
         setServices(response.data.pagedList);
       } catch (err: any) {
         setError("Lỗi khi tải danh sách giá dịch vụ.");
@@ -107,7 +111,7 @@ const ServicePricesList = () => {
     if (selectedService && newPrice !== "") {
       setIsSaving(true);
       try {
-        await axios.put(`${backendApi}/prices/${selectedService.id}`, {
+        await axiosInstance.put(`${backendApi}/prices/${selectedService.id}`, {
           price1: newPrice,
           unit: selectedService.unit,
           type: selectedService.type,
