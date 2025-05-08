@@ -7,6 +7,7 @@ import { Avatar, Card, CardBody } from "@material-tailwind/react";
 import { DefaultPagination } from "../pagination/pagination";
 import axios from "axios";
 import CreatePostForm from "../create_post/create_post_form";
+import axiosInstance from "@/utils/axiosInstance";
 
 type Thread = {
   threadId: number;
@@ -109,25 +110,22 @@ export default function Posts() {
         });
       }
 
-      const response = await axios.get(
-        `${backendApi}/threads/filter/statuses-and-tags`,
-        {
-          signal: controller.signal,
-          params,
-          paramsSerializer: (params) => {
-            const query = new URLSearchParams();
-            for (const key in params) {
-              const value = params[key];
-              if (Array.isArray(value)) {
-                value.forEach((v) => query.append(key, v));
-              } else {
-                query.append(key, value);
-              }
+      const response = await axiosInstance.get(`${backendApi}/threads/`, {
+        signal: controller.signal,
+        params,
+        paramsSerializer: (params) => {
+          const query = new URLSearchParams();
+          for (const key in params) {
+            const value = params[key];
+            if (Array.isArray(value)) {
+              value.forEach((v) => query.append(key, v));
+            } else {
+              query.append(key, value);
             }
-            return query.toString();
-          },
+          }
+          return query.toString();
         },
-      );
+      });
 
       if (requestId === latestRequestId.current) {
         setPosts(response.data.pagedList);
@@ -156,7 +154,7 @@ export default function Posts() {
 
   const fetchTags = async () => {
     try {
-      const response = await axios.get(`${backendApi}/tags/thread`);
+      const response = await axiosInstance.get(`${backendApi}/tags/thread`);
       setThreadTags(response.data);
     } catch (err) {
       console.error("Lỗi khi tải tag:", err);
@@ -165,7 +163,7 @@ export default function Posts() {
   const handleHideTag = async (tagId: number) => {
     setTagLoading(tagId, true);
     try {
-      await axios.put(`${backendApi}/tags/admin/hide/${tagId}`);
+      await axiosInstance.put(`${backendApi}/tags/admin/hide/${tagId}`);
       fetchTags();
     } catch (error) {
       console.error("Lỗi khi ẩn tag:", error);
@@ -177,7 +175,7 @@ export default function Posts() {
   const handleReactivateTag = async (tagId: number) => {
     setTagLoading(tagId, true);
     try {
-      await axios.put(`${backendApi}/tags/admin/activate/${tagId}`);
+      await axiosInstance.put(`${backendApi}/tags/admin/activate/${tagId}`);
       fetchTags();
     } catch (error) {
       console.error("Lỗi khi kích hoạt lại tag:", error);

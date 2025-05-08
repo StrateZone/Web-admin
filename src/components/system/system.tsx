@@ -13,6 +13,7 @@ import OpenCloseConfig from "../open_close_config/open_close_config";
 import CancelPolicyConfig from "../cancel_policy_config/cancel_policy_config";
 import ConfigCommunityPoint from "../config_community_point/config_community_point";
 import ProfanitiesManagement from "../profanities_management/profanities_management";
+import axiosInstance from "@/utils/axiosInstance";
 
 export type SystemConfig = {
   id: number;
@@ -45,7 +46,9 @@ export default function System() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get<SystemConfig>(`${backendApi}/system/1`);
+      const res = await axiosInstance.get<SystemConfig>(
+        `${backendApi}/system/1`,
+      );
       setSystemConfigData(res.data);
     } catch (err) {
       console.error("Lỗi khi lấy dữ liệu hệ thống:", err);

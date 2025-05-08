@@ -14,6 +14,7 @@ import { DefaultPagination } from "../pagination/pagination";
 import axios from "axios";
 import { config } from "../../../config";
 import AddRoomPopup from "./add_room_form";
+import axiosInstance from "@/utils/axiosInstance";
 
 interface Room {
   roomId: number;
@@ -54,7 +55,7 @@ export default function RoomList() {
 
     setLoading(true);
     try {
-      const res = await axios.get(`${backendApi}/rooms/all`, {
+      const res = await axiosInstance.get(`${backendApi}/rooms/all`, {
         signal: controller.signal,
         params: {
           "page-number": currentPage,
@@ -86,8 +87,6 @@ export default function RoomList() {
   const handleBack = () => {
     setSelectedRoomId(null);
   };
-
-  console.log(loading);
 
   return (
     <div className="p-4 min-h-full p-6 bg-gray-400">

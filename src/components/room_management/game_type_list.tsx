@@ -10,6 +10,7 @@ import {
 import ConfirmPopup from "../confirm_popup/confirm_popup";
 import { config } from "../../../config";
 import AddGameTypeForm from "./add_game_type_form";
+import axiosInstance from "@/utils/axiosInstance";
 
 interface GameType {
   typeId: number;
@@ -30,7 +31,7 @@ const GameTypeTable: React.FC = () => {
 
   const fetchGameTypes = async () => {
     try {
-      const res = await axios.get<GameType[]>(
+      const res = await axiosInstance.get<GameType[]>(
         `${backendApi}/game_types/all-admin`,
       );
       setGameTypes(res.data);

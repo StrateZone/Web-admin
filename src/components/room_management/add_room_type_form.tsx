@@ -8,6 +8,8 @@ import {
   IconButton,
 } from "@material-tailwind/react";
 import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
+import { config } from "../../../config";
 
 interface AddRoomTypeFormProps {
   isOpen: boolean;
@@ -20,6 +22,7 @@ const AddRoomTypeForm: React.FC<AddRoomTypeFormProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const backendApi = config.BACKEND_API;
   const [typeName, setTypeName] = useState("");
   const [pricePerHour, setPricePerHour] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -28,13 +31,10 @@ const AddRoomTypeForm: React.FC<AddRoomTypeFormProps> = ({
     if (!typeName) return alert("Vui lòng nhập tên loại phòng");
     setLoading(true);
     try {
-      await axios.post(
-        "https://backend-production-ac5e.up.railway.app/api/rooms/room-type",
-        {
-          typeName,
-          pricePerHour,
-        },
-      );
+      await axiosInstance.post(`${backendApi}/rooms/room-type`, {
+        typeName,
+        pricePerHour,
+      });
       onSuccess();
       onClose();
       setTypeName("");

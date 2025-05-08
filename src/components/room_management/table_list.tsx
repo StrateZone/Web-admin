@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 
 interface Table {
   tableId: number;
@@ -89,7 +90,7 @@ export default function TableList() {
     setError(null);
 
     try {
-      const res = await axios.get(`${backendApi}/tables`, {
+      const res = await axiosInstance.get(`${backendApi}/tables`, {
         signal: controller.signal,
         params: {
           "page-number": currentPage,

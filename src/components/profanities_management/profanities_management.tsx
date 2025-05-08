@@ -13,6 +13,7 @@ import { config } from "../../../config";
 import { DefaultPagination } from "../pagination/pagination";
 import { TrashIcon } from "lucide-react";
 import ConfirmPopup from "../confirm_popup/confirm_popup";
+import axiosInstance from "@/utils/axiosInstance";
 
 type Profanity = {
   id: number;
@@ -64,7 +65,7 @@ export default function ProfanitiesManagement() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${backendApi}/profanities`, {
+      const response = await axiosInstance.get(`${backendApi}/profanities`, {
         signal: controller.signal,
         params: {
           "page-number": currentPage,
@@ -100,7 +101,9 @@ export default function ProfanitiesManagement() {
 
     setDeletingId(confirmDeleteId);
     try {
-      await axios.delete(`${backendApi}/profanities/${confirmDeleteId}`);
+      await axiosInstance.delete(
+        `${backendApi}/profanities/${confirmDeleteId}`,
+      );
       setProfanities((prev) =>
         prev.filter((item) => item.id !== confirmDeleteId),
       );
@@ -120,7 +123,7 @@ export default function ProfanitiesManagement() {
 
     setIsCreating(true);
     try {
-      await axios.post(`${backendApi}/profanities`, newProfanity, {
+      await axiosInstance.post(`${backendApi}/profanities`, newProfanity, {
         headers: {
           "Content-Type": "application/json",
         },

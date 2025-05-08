@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { UserPlus } from "lucide-react";
+import { config } from "../../../config";
+import axiosInstance from "@/utils/axiosInstance";
 
 interface Props {
   year: number;
@@ -8,6 +10,7 @@ interface Props {
 }
 
 const NewUsersCard: React.FC<Props> = ({ year, month }) => {
+  const backendApi = config.BACKEND_API;
   const [newUsers, setNewUsers] = useState<number | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -15,8 +18,8 @@ const NewUsersCard: React.FC<Props> = ({ year, month }) => {
   const fetchNewUsers = async () => {
     setIsLoading(true);
     try {
-      const res = await axios.get(
-        `https://backend-production-ac5e.up.railway.app/api/analytics/new-users/year/${year}/month/${month}`,
+      const res = await axiosInstance.get(
+        `${backendApi}/analytics/new-users/year/${year}/month/${month}`,
       );
       setNewUsers(res.data.usersJoined);
     } catch (error) {

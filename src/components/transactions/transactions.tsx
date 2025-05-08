@@ -18,6 +18,7 @@ import axios from "axios";
 import { config } from "../../../config";
 import ServicePricesList from "../price_list/price_list";
 import ExpenseList from "../expense_list/expense_list";
+import axiosInstance from "@/utils/axiosInstance";
 
 const TABS = [
   {
@@ -110,7 +111,7 @@ export default function Transactions() {
 
     setIsLoading(true);
     try {
-      const res = await axios.get(`${backendApi}/transactions`, {
+      const res = await axiosInstance.get(`${backendApi}/transactions`, {
         signal: controller.signal,
         params: {
           "page-number": currentPage,
@@ -270,7 +271,6 @@ export default function Transactions() {
         </Card>
       </div>
       <ServicePricesList></ServicePricesList>
-      <ExpenseList></ExpenseList>
     </div>
   );
 }

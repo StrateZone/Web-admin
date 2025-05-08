@@ -13,6 +13,7 @@ import {
 } from "@material-tailwind/react";
 import TabContent from "@/components/sidebar/tab_content";
 import { TabsContext } from "@material-tailwind/react/components/Tabs/TabsContext";
+import axiosInstance from "@/utils/axiosInstance";
 
 type Thread = {
   threadId: number;
@@ -64,13 +65,16 @@ export default function PostDetail({
     if (!postId) return;
 
     try {
-      const res = await fetch(`${backendApi}/threads/approve/${postId}`, {
-        method: "PUT",
-      });
+      const res = await axiosInstance.put(
+        `${backendApi}/threads/approve/${postId}`,
+        {
+          method: "PUT",
+        },
+      );
 
-      if (!res.ok) {
-        throw new Error("Không thể approve bài viết.");
-      }
+      // if (!res.ok) {
+      //   throw new Error("Không thể approve bài viết.");
+      // }
 
       fetchPost();
       toast.success("Bài viết đã được duyệt!");
@@ -85,13 +89,16 @@ export default function PostDetail({
     if (!postId) return;
 
     try {
-      const res = await fetch(`${backendApi}/threads/reject/${postId}`, {
-        method: "PUT",
-      });
+      const res = await axiosInstance.put(
+        `${backendApi}/threads/reject/${postId}`,
+        {
+          method: "PUT",
+        },
+      );
 
-      if (!res.ok) {
-        throw new Error("Không thể reject bài viết.");
-      }
+      // if (!res.ok) {
+      //   throw new Error("Không thể reject bài viết.");
+      // }
 
       fetchPost();
       toast.success("Bài viết đã bị từ chối!");
@@ -105,13 +112,12 @@ export default function PostDetail({
     if (!postId) return;
 
     try {
-      const res = await fetch(`${backendApi}/threads/${postId}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        throw new Error("Không thể ẩn bài viết.");
-      }
+      const res = await axiosInstance.delete(
+        `${backendApi}/threads/${postId}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       toast.success("Bài viết đã xóa!");
       onBack();
@@ -123,11 +129,9 @@ export default function PostDetail({
 
   const fetchPost = async () => {
     try {
-      const res = await fetch(`${backendApi}/threads/${postId}`);
-      if (!res.ok) throw new Error("Không tìm thấy bài viết");
+      const res = await axiosInstance.get(`${backendApi}/threads/${postId}`);
 
-      const data = await res.json();
-      setPost(data);
+      setPost(res.data);
     } catch (err) {
       setError("Không thể tải bài viết.");
       toast.error("Không thể tải bài viết.");
