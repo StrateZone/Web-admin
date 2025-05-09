@@ -57,7 +57,7 @@ const GameTypeTable: React.FC = () => {
     if (!selectedType || !confirmAction) return;
 
     try {
-      await axios.put(
+      await axiosInstance.put(
         `${backendApi}/game_types/${confirmAction}/${selectedType.typeId}`,
       );
       setPopupOpen(false);
