@@ -10,8 +10,9 @@ import ExpenseChart from "../revenue_expense_chart/expense_chart";
 import ProfitLineChart from "../profit_line_chart/profit_line_chart";
 
 export default function Dashboard() {
-  const [year, setYear] = useState<number>(2025);
-  const [month, setMonth] = useState<number>(4);
+  const currentDate = new Date();
+  const [year, setYear] = useState<number>(currentDate.getFullYear());
+  const [month, setMonth] = useState<number>(currentDate.getMonth() + 1);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
