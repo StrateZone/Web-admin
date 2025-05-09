@@ -29,6 +29,7 @@ export type SystemConfig = {
   appointmentRequest_MinHours_UntilExpiration: number;
   percentageRefund_IfNot100: number;
   percentageTimeRange_UntilRequestExpiration: number;
+  verification_OTP_Duration: number;
   status: string; //status
 };
 
@@ -112,6 +113,7 @@ export default function CancelPolicyConfig({
         appointmentRequest_MinHours_UntilExpiration: minInvitationExpiry,
         percentageRefund_IfNot100: refundOtherThan100 / 100,
         percentageTimeRange_UntilRequestExpiration: invitaionExpiry / 100,
+        verification_OTP_Duration: systemConfigData?.verification_OTP_Duration,
         status: systemConfigData?.status,
       });
       setIsEditing(false);
@@ -380,7 +382,42 @@ export default function CancelPolicyConfig({
                 </Button>
                 <Button
                   color="red"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setRefundHour(
+                      systemConfigData?.appointment_Refund100_HoursFromScheduleTime ??
+                        0,
+                    );
+                    setIncomingHour(
+                      systemConfigData?.appointment_Incoming_HoursFromScheduleTime ??
+                        0,
+                    );
+                    setCheckinMinutes(
+                      systemConfigData?.appointment_Checkin_MinutesFromScheduleTime ??
+                        0,
+                    );
+                    setMaxCancelPerWeek(
+                      systemConfigData?.max_NumberOfTables_CancelPerWeek ?? 0,
+                    );
+                    setMaxInvitation(
+                      systemConfigData?.max_NumberOfUsers_InvitedToTable ?? 0,
+                    );
+                    setMaxInvitationExpiry(
+                      systemConfigData?.appointmentRequest_MaxHours_UntilExpiration ??
+                        0,
+                    );
+                    setMinInvitationExpiry(
+                      systemConfigData?.appointmentRequest_MinHours_UntilExpiration ??
+                        0,
+                    );
+                    setRefundOtherThan100(
+                      (systemConfigData?.percentageRefund_IfNot100 ?? 0) * 100,
+                    );
+                    setInvitaionExpiry(
+                      (systemConfigData?.percentageTimeRange_UntilRequestExpiration ??
+                        0) * 100,
+                    );
+                  }}
                   disabled={isSaving}
                 >
                   Hủy

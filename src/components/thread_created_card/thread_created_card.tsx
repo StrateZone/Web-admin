@@ -20,7 +20,7 @@ const ThreadsCreatedCard: React.FC<Props> = ({ year, month }) => {
       const res = await axiosInstance.get(
         `${backendApi}/analytics/threads-report/year/${year}/month/${month}`,
       );
-      setThreadsData(res.data.threadsCreated);
+      setThreadsData(res.data);
     } catch (error) {
       console.error("Lỗi khi fetch dữ liệu bài viết:", error);
     } finally {

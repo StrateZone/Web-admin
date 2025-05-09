@@ -19,7 +19,7 @@ const MembershipsPurchasedCard: React.FC<Props> = ({ year, month }) => {
         const res = await axiosInstance.get(
           `${backendApi}/analytics/memberships-purchased/year/${year}/month/${month}`,
         );
-        setCount(res.data.membershipsPurchased);
+        setCount(res.data);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu membership:", error);
       } finally {

@@ -86,6 +86,7 @@ export default function RoomList() {
 
   const handleBack = () => {
     setSelectedRoomId(null);
+    fetchRooms();
   };
 
   return (

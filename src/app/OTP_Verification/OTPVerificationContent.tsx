@@ -16,13 +16,38 @@ export default function OTPVerificationContent() {
   const [timer, setTimer] = useState(300);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const inputsRef = useRef<HTMLInputElement[]>([]);
+  const [otpDuration, setOtpDuration] = useState<number | null>(null);
+
   const backendApi = config.BACKEND_API;
 
   useEffect(() => {
     if (!email) {
       router.push("/login");
+      return;
     }
 
+    const fetchSystemConfig = async () => {
+      try {
+        const res = await axios.get(`${backendApi}/system/1`);
+        const durationInMinutes = res.data.verification_OTP_Duration;
+        const durationInSeconds = durationInMinutes * 60;
+        setOtpDuration(durationInSeconds);
+        setTimer(durationInSeconds); // set thời gian ban đầu
+      } catch (error) {
+        console.error("Lỗi khi lấy cấu hình hệ thống:", error);
+        // fallback nếu lỗi
+        setOtpDuration(300);
+        setTimer(300);
+      }
+    };
+
+    fetchSystemConfig();
+  }, [email, router]);
+
+  useEffect(() => {
+    if (otpDuration === null) return;
+
+    setIsResendDisabled(true);
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev === 1) {
@@ -35,7 +60,7 @@ export default function OTPVerificationContent() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [email, router]);
+  }, [otpDuration]);
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -91,7 +116,7 @@ export default function OTPVerificationContent() {
 
   const handleResendOTP = async () => {
     setIsResendDisabled(true);
-    setTimer(300);
+    setTimer(otpDuration ?? 300); // fallback nếu null
 
     try {
       await axios.post(

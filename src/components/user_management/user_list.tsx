@@ -189,17 +189,23 @@ const UserCardList: React.FC = () => {
         );
       } else if (newStatus === "Active" && selectedUser.userRole === "Member") {
         // Các trường hợp dùng API thông thường
-        await axiosInstance.put(`${backendApi}/users/${selectedUser.userId}`, {
-          userId: selectedUser.userId,
-          status: newStatus,
-          userRole: selectedUser.userRole,
-        });
+        await axiosInstance.put(
+          `${backendApi}/users/update/${selectedUser.userId}`,
+          {
+            userId: selectedUser.userId,
+            status: newStatus,
+            userRole: selectedUser.userRole,
+          },
+        );
       } else {
         // Các trường hợp khác dùng API thông thường
-        await axiosInstance.put(`${backendApi}/users/${selectedUser.userId}`, {
-          userId: selectedUser.userId,
-          status: newStatus,
-        });
+        await axiosInstance.put(
+          `${backendApi}/users/update/${selectedUser.userId}`,
+          {
+            userId: selectedUser.userId,
+            status: newStatus,
+          },
+        );
       }
       fetchUsers();
     } catch (err) {

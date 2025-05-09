@@ -27,6 +27,7 @@ export default function TableList() {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [roomNames, setRoomNames] = useState<Record<number, string>>({});
 
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +41,17 @@ export default function TableList() {
         return "bg-red-500"; // Màu đỏ cho "out_of_service"
       default:
         return "bg-gray-500"; // Màu xám mặc định
+    }
+  };
+
+  const fetchRoomName = async (roomId: number) => {
+    if (roomNames[roomId]) return; // đã có rồi thì bỏ qua
+
+    try {
+      const res = await axiosInstance.get(`${backendApi}/rooms/${roomId}`);
+      setRoomNames((prev) => ({ ...prev, [roomId]: res.data.roomName }));
+    } catch (err) {
+      console.error(`Không thể lấy tên phòng cho roomId ${roomId}`, err);
     }
   };
 
@@ -103,6 +115,11 @@ export default function TableList() {
       if (requestId === latestRequestIdRef.current) {
         setTables(res.data.pagedList);
         setTotalPages(res.data.totalPages);
+
+        const uniqueRoomIds = [
+          ...new Set(res.data.pagedList.map((table: Table) => table.roomId)),
+        ];
+        uniqueRoomIds.forEach((roomId) => fetchRoomName(roomId as number));
       }
     } catch (error: any) {
       if (axios.isCancel(error)) {
@@ -166,7 +183,7 @@ export default function TableList() {
                     className="flex justify-between items-center p-4 bg-white rounded shadow"
                   >
                     <span>Bàn {table.tableId}</span>
-                    <span>Phòng {table.roomId}</span>
+                    <span>Phòng {roomNames[table.roomId]}</span>
                     <span>{gameTypeTranslations[table.gameTypeId]}</span>
                     <span
                       className={`px-2 py-0.5 text-xs text-white rounded-full ${getStatusColor(

@@ -84,7 +84,6 @@ export default function Posts() {
       "published",
       "rejected",
       "pending",
-      "deleted",
       "hidden",
       "edit_pending",
     ];
@@ -232,7 +231,11 @@ export default function Posts() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
           <div className="flex space-x-4">
             <button
-              onClick={() => handleTabChange("all")}
+              onClick={() => {
+                if (activeTab !== "all") {
+                  handleTabChange("all");
+                }
+              }}
               className={`px-4 py-2 rounded-lg font-semibold transition ${
                 activeTab === "all"
                   ? "bg-blue-600 text-white"
@@ -242,7 +245,11 @@ export default function Posts() {
               Tất cả
             </button>
             <button
-              onClick={() => handleTabChange("pending")}
+              onClick={() => {
+                if (activeTab !== "pending") {
+                  handleTabChange("pending");
+                }
+              }}
               className={`px-4 py-2 rounded-lg font-semibold transition ${
                 activeTab === "pending"
                   ? "bg-blue-600 text-white"
