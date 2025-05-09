@@ -19,6 +19,7 @@ import { config } from "../../../config";
 import ServicePricesList from "../price_list/price_list";
 import ExpenseList from "../expense_list/expense_list";
 import axiosInstance from "@/utils/axiosInstance";
+import VoucherTable from "./voucher_list";
 
 const TABS = [
   {
@@ -271,6 +272,7 @@ export default function Transactions() {
         </Card>
       </div>
       <ServicePricesList></ServicePricesList>
+      <VoucherTable></VoucherTable>
     </div>
   );
 }

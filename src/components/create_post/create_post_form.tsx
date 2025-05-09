@@ -67,7 +67,10 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({
     };
     setIsSubmitting(true);
     try {
-      const threadResponse = await axios.post(`${backendApi}/threads`, newPost);
+      const threadResponse = await axiosInstance.post(
+        `${backendApi}/threads`,
+        newPost,
+      );
       toast.success("Đăng bài thành công!");
 
       if (thumbnail) {
