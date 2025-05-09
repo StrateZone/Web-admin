@@ -3,6 +3,7 @@ import { config } from "../../../config";
 import { Button, Typography } from "@material-tailwind/react";
 import axios from "axios";
 import axiosInstance from "@/utils/axiosInstance";
+import { toast } from "react-toastify";
 
 function AddRoomPopup({
   onClose,
@@ -53,23 +54,29 @@ function AddRoomPopup({
       onSuccess(); // Refresh list
       onClose(); // Close popup
     } catch (err) {
-      console.error("Lỗi khi thêm phòng:", err);
+      alert(`Lỗi khi thêm phòng`);
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black/30 flex justify-center items-center z-50">
       <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
-        <Typography variant="h6" className="mb-4 text-black">
+        <Typography variant="h4" className="mb-4 text-black">
           Thêm phòng mới
         </Typography>
         <div className="space-y-4">
+          <Typography variant="h6" className="mb-4 text-black">
+            Tên phòng
+          </Typography>
           <input
             name="roomName"
             placeholder="Tên phòng"
             onChange={handleChange}
             className="w-full p-2 border rounded text-black"
           />
+          <Typography variant="h6" className="mb-4 text-black">
+            Loại phòng
+          </Typography>
           <select
             name="type"
             onChange={handleChange}
@@ -82,17 +89,22 @@ function AddRoomPopup({
               </option>
             ))}
           </select>
+          <Typography variant="h6" className="mb-4 text-black">
+            Mô tả phòng
+          </Typography>
           <input
             name="description"
             placeholder="Mô tả"
             onChange={handleChange}
             className="w-full p-2 border rounded text-black"
           />
+          <Typography variant="h6" className="mb-4 text-black">
+            Số bàn tối đa
+          </Typography>
           <input
             name="capacity"
             type="number"
             min="0"
-            placeholder="Sức chứa"
             value={formData.capacity}
             onChange={handleChange}
             className="w-full p-2 border rounded text-black"

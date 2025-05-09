@@ -29,6 +29,7 @@ export type SystemConfig = {
   appointmentRequest_MinHours_UntilExpiration: number;
   percentageRefund_IfNot100: number;
   percentageTimeRange_UntilRequestExpiration: number;
+  verification_OTP_Duration: number;
   status: string; //status
 };
 
@@ -95,6 +96,10 @@ export default function ConfigCommunityPoint({
           systemConfigData?.appointmentRequest_MaxHours_UntilExpiration,
         appointmentRequest_MinHours_UntilExpiration:
           systemConfigData?.appointmentRequest_MinHours_UntilExpiration,
+        percentageRefund_IfNot100: systemConfigData?.percentageRefund_IfNot100,
+        percentageTimeRange_UntilRequestExpiration:
+          systemConfigData?.percentageTimeRange_UntilRequestExpiration,
+        verification_OTP_Duration: systemConfigData?.verification_OTP_Duration,
         status: systemConfigData?.status,
       });
       console.log("Cập nhật thành công!");
@@ -235,7 +240,22 @@ export default function ConfigCommunityPoint({
                 </Button>
                 <Button
                   color="red"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setPointPerThread(
+                      systemConfigData?.contributionPoints_PerThread ?? 0,
+                    );
+                    setPointPerComment(
+                      systemConfigData?.contributionPoints_PerComment ?? 0,
+                    );
+                    setPercentCheckinReward(
+                      (systemConfigData?.userPoints_PerCheckinTable_ByPercentageOfTablesPrice ??
+                        0) * 100,
+                    ); // đổi thành % cho dễ nhập
+                    setNumberOfTopContributor(
+                      systemConfigData?.numberof_TopContributors_PerWeek ?? 0,
+                    );
+                  }}
                   disabled={isSaving}
                 >
                   Hủy

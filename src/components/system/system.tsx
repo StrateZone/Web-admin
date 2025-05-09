@@ -33,6 +33,7 @@ export type SystemConfig = {
   max_NumberOfUsers_InvitedToTable: number;
   percentageRefund_IfNot100: number;
   percentageTimeRange_UntilRequestExpiration: number;
+  verification_OTP_Duration: number;
   status: string; //status
 };
 

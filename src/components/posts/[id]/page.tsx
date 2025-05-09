@@ -60,6 +60,25 @@ export default function PostDetail({
   const isAdmin = userRole === "Admin";
   const backendApi = config.BACKEND_API;
 
+  const [originalPost, setOriginalPost] = useState<Thread | null>(null);
+
+  const fetchOriginalPost = async () => {
+    try {
+      const res = await axiosInstance.get(
+        `${backendApi}/threads/original-of/${postId}`,
+      );
+      setOriginalPost(res.data);
+    } catch (err) {
+      console.error("Không thể tải bài viết gốc.");
+    }
+  };
+
+  useEffect(() => {
+    if (post?.status === "edit_pending") {
+      fetchOriginalPost();
+    }
+  }, [post]);
+
   // Hàm gọi API approve bài viết
   const handleApprove = async () => {
     if (!postId) return;
@@ -71,10 +90,6 @@ export default function PostDetail({
           method: "PUT",
         },
       );
-
-      // if (!res.ok) {
-      //   throw new Error("Không thể approve bài viết.");
-      // }
 
       fetchPost();
       toast.success("Bài viết đã được duyệt!");
@@ -95,10 +110,6 @@ export default function PostDetail({
           method: "PUT",
         },
       );
-
-      // if (!res.ok) {
-      //   throw new Error("Không thể reject bài viết.");
-      // }
 
       fetchPost();
       toast.success("Bài viết đã bị từ chối!");
@@ -130,6 +141,10 @@ export default function PostDetail({
   const fetchPost = async () => {
     try {
       const res = await axiosInstance.get(`${backendApi}/threads/${postId}`);
+
+      if (res.data.status === "edit_pending") {
+        fetchOriginalPost(); // gọi ở đây luôn
+      }
 
       setPost(res.data);
     } catch (err) {
@@ -163,6 +178,104 @@ export default function PostDetail({
       </div>
     );
 
+  if (post.status === "edit_pending")
+    return (
+      <div className="max-w-7xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+        <ToastContainer />
+        <button
+          onClick={onBack}
+          className="mb-4 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-lg"
+        >
+          ← Quay lại danh sách
+        </button>
+
+        <div className="grid grid-cols-2 gap-6">
+          {/* Bản gốc */}
+          <div>
+            <h2 className="text-xl font-bold mb-2 text-gray-700 dark:text-gray-200">
+              Bản gốc
+            </h2>
+            {originalPost?.thumbnailUrl && (
+              <img
+                src={originalPost.thumbnailUrl}
+                alt="Original thumbnail"
+                className="w-full h-48 object-cover rounded-md mb-2"
+              />
+            )}
+            <h3 className="text-2xl font-semibold">{originalPost?.title}</h3>
+            <div className="flex flex-wrap gap-2 mt-2 mb-4">
+              {originalPost?.threadsTags.map((item) => (
+                <span
+                  key={item.tag.tagId}
+                  className="text-xs rounded-full px-2 py-0.5"
+                  style={{ backgroundColor: item.tag.tagColor, color: "#fff" }}
+                >
+                  {item.tag.tagName}
+                </span>
+              ))}
+            </div>
+            <div
+              className="prose dark:prose-invert max-w-none bg-gray-100 dark:bg-gray-800 p-4 rounded-md"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(
+                  originalPost?.content || "<p>(Không có nội dung)</p>",
+                ),
+              }}
+            />
+          </div>
+
+          {/* Bản chỉnh sửa */}
+          <div>
+            <h2 className="text-xl font-bold mb-2 text-gray-700 dark:text-gray-200">
+              Bản chỉnh sửa
+            </h2>
+            {post.thumbnailUrl && (
+              <img
+                src={post.thumbnailUrl}
+                alt="Edited thumbnail"
+                className="w-full h-48 object-cover rounded-md mb-2"
+              />
+            )}
+            <h3 className="text-2xl font-semibold">{post.title}</h3>
+            <div className="flex flex-wrap gap-2 mt-2 mb-4">
+              {post.threadsTags.map((item) => (
+                <span
+                  key={item.tag.tagId}
+                  className="text-xs rounded-full px-2 py-0.5"
+                  style={{ backgroundColor: item.tag.tagColor, color: "#fff" }}
+                >
+                  {item.tag.tagName}
+                </span>
+              ))}
+            </div>
+            <div
+              className="prose dark:prose-invert max-w-none bg-gray-100 dark:bg-gray-800 p-4 rounded-md"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(
+                  post.content || "<p>(Không có nội dung)</p>",
+                ),
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Các nút hành động */}
+        <div className="mt-6 flex space-x-4">
+          <button
+            onClick={handleApprove}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+          >
+            Duyệt
+          </button>
+          <button
+            onClick={handleReject}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          >
+            Từ chối
+          </button>
+        </div>
+      </div>
+    );
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
       <ToastContainer />
@@ -174,7 +287,6 @@ export default function PostDetail({
         ← Quay lại danh sách
       </button>
 
-      {/* Hình ảnh thumbnail */}
       {post.thumbnailUrl && (
         <img
           src={post.thumbnailUrl}
@@ -183,7 +295,6 @@ export default function PostDetail({
         />
       )}
 
-      {/* Tiêu đề bài viết */}
       <h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-4">
         {post.title}
       </h1>
@@ -205,7 +316,6 @@ export default function PostDetail({
         </div>
       )}
 
-      {/* Thông tin tác giả và ngày tạo */}
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
         <span className="font-semibold">Tác giả:</span>{" "}
         {post.createdByNavigation.fullName}
@@ -241,8 +351,6 @@ export default function PostDetail({
           </button>
         </div>
       )}
-
-      {/* Hiển thị trạng thái */}
       <div className="mb-4">
         <span
           className={`text-sm font-medium px-3 py-1 rounded-full ${
@@ -276,8 +384,6 @@ export default function PostDetail({
                       : "Chờ duyệt"}
         </span>
       </div>
-
-      {/* Nội dung bài viết */}
       <span>Nội dung</span>
       <div
         className="prose dark:prose-invert max-w-none mb-6 px-4 py-6 bg-gray-50 text-gray-900 dark:text-white dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-in-out"

@@ -21,7 +21,7 @@ const NewUsersCard: React.FC<Props> = ({ year, month }) => {
       const res = await axiosInstance.get(
         `${backendApi}/analytics/new-users/year/${year}/month/${month}`,
       );
-      setNewUsers(res.data.usersJoined);
+      setNewUsers(res.data);
     } catch (error) {
       console.error("Lỗi khi fetch người dùng mới:", error);
     } finally {

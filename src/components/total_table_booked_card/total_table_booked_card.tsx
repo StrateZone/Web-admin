@@ -22,7 +22,7 @@ const TableBookingsCard: React.FC<Props> = ({ year, month }) => {
         const res = await axiosInstance.get(
           `${backendApi}/analytics/tables-appointment-report/year/${year}/month/${month}`,
         );
-        setBookings(res.data.tablesAppointmentBooked);
+        setBookings(res.data);
       } catch (error) {
         console.error("Lỗi khi fetch dữ liệu đặt bàn:", error);
       } finally {
