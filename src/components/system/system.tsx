@@ -14,6 +14,7 @@ import CancelPolicyConfig from "../cancel_policy_config/cancel_policy_config";
 import ConfigCommunityPoint from "../config_community_point/config_community_point";
 import ProfanitiesManagement from "../profanities_management/profanities_management";
 import axiosInstance from "@/utils/axiosInstance";
+import ExtendPlaytimeConfig from "../extend_playtime_config/extend_playtime_config";
 
 export type SystemConfig = {
   id: number;
@@ -34,6 +35,11 @@ export type SystemConfig = {
   percentageRefund_IfNot100: number;
   percentageTimeRange_UntilRequestExpiration: number;
   verification_OTP_Duration: number;
+  min_Minutes_For_TablesExtend: number;
+  max_Minutes_For_TablesExtend: number;
+  extendAllow_BeforeMinutes_FromTableComplete: number;
+  extendCancel_BeforeMinutes_FromPlayTime: number;
+  percentage_Refund_On_ExtendedTables: number;
   status: string; //status
 };
 
@@ -79,6 +85,10 @@ export default function System() {
           isLoading={isLoading}
         />
         <CancelPolicyConfig
+          systemConfigData={systemConfigData}
+          isLoading={isLoading}
+        />
+        <ExtendPlaytimeConfig
           systemConfigData={systemConfigData}
           isLoading={isLoading}
         />

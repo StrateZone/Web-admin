@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { config } from "../../../config";
 import axiosInstance from "@/utils/axiosInstance";
+import ConfirmPopup from "../confirm_popup/confirm_popup";
 
 interface Table {
   tableId: number;
@@ -40,6 +41,12 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
   const [selectedGameTypeId, setSelectedGameTypeId] = useState<number>(0);
   const [creating, setCreating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
+  const [actionType, setActionType] = useState<"disable" | "enable" | null>(
+    null,
+  );
+
   const [loading, setLoading] = useState(true);
 
   // const gameTypeTranslations: Record<string, string> = {
@@ -137,6 +144,42 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
       alert("Thêm bàn thất bại!");
     } finally {
       setCreating(false);
+    }
+  };
+
+  const openConfirmPopup = (tableId: number, type: "disable" | "enable") => {
+    setSelectedTableId(tableId);
+    setActionType(type);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmAction = async () => {
+    if (selectedTableId === null || actionType === null) return;
+
+    const url =
+      actionType === "disable"
+        ? `${backendApi}/tables/disable/${selectedTableId}`
+        : `${backendApi}/tables/enable/${selectedTableId}`;
+
+    try {
+      await axiosInstance.put(url);
+      setTables((prevTables) =>
+        prevTables.map((table) =>
+          table.tableId === selectedTableId
+            ? {
+                ...table,
+                status: actionType === "disable" ? "out_of_service" : "active",
+              }
+            : table,
+        ),
+      );
+    } catch (error) {
+      console.error(`Lỗi khi ${actionType} bàn:`, error);
+      alert(`Không thể ${actionType === "disable" ? "ngưng" : "bật"} bàn.`);
+    } finally {
+      setConfirmOpen(false);
+      setSelectedTableId(null);
+      setActionType(null);
     }
   };
 
@@ -242,11 +285,42 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
                 >
                   {getStatusLabel(table.status)}
                 </span>
+                {table.status === "out_of_service" ? (
+                  <button
+                    onClick={() => openConfirmPopup(table.tableId, "enable")}
+                    className="mt-2 md:mt-0 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                  >
+                    Bật lại
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => openConfirmPopup(table.tableId, "disable")}
+                    className="mt-2 md:mt-0 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  >
+                    Ngưng hoạt động
+                  </button>
+                )}
               </li>
             ))}
           </ul>
         </div>
       </div>
+      <ConfirmPopup
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmAction}
+        title={
+          actionType === "disable"
+            ? "Xác nhận ngưng hoạt động bàn"
+            : "Xác nhận bật lại bàn"
+        }
+        message={
+          actionType === "disable"
+            ? `Bạn có chắc chắn muốn ngưng hoạt động bàn này?\nCác đơn của bàn này trong tương lại sẽ được hoàn tiền 100% cho khách hàng`
+            : "Bạn có chắc chắn muốn bật lại bàn này để sử dụng?"
+        }
+        confirmText={actionType === "disable" ? "Ngưng hoạt động" : "Bật lại"}
+      />
     </div>
   );
 }

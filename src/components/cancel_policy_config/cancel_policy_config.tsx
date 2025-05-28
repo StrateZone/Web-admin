@@ -30,6 +30,11 @@ export type SystemConfig = {
   percentageRefund_IfNot100: number;
   percentageTimeRange_UntilRequestExpiration: number;
   verification_OTP_Duration: number;
+  min_Minutes_For_TablesExtend: number;
+  max_Minutes_For_TablesExtend: number;
+  extendAllow_BeforeMinutes_FromTableComplete: number;
+  extendCancel_BeforeMinutes_FromPlayTime: number;
+  percentage_Refund_On_ExtendedTables: number;
   status: string; //status
 };
 
@@ -114,6 +119,16 @@ export default function CancelPolicyConfig({
         percentageRefund_IfNot100: refundOtherThan100 / 100,
         percentageTimeRange_UntilRequestExpiration: invitaionExpiry / 100,
         verification_OTP_Duration: systemConfigData?.verification_OTP_Duration,
+        min_Minutes_For_TablesExtend:
+          systemConfigData?.min_Minutes_For_TablesExtend,
+        max_Minutes_For_TablesExtend:
+          systemConfigData?.max_Minutes_For_TablesExtend,
+        extendAllow_BeforeMinutes_FromTableComplete:
+          systemConfigData?.extendAllow_BeforeMinutes_FromTableComplete,
+        extendCancel_BeforeMinutes_FromPlayTime:
+          systemConfigData?.extendCancel_BeforeMinutes_FromPlayTime,
+        percentage_Refund_On_ExtendedTables:
+          systemConfigData?.percentage_Refund_On_ExtendedTables,
         status: systemConfigData?.status,
       });
       setIsEditing(false);
