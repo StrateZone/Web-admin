@@ -8,7 +8,6 @@ import {
 import React, { useEffect, useState } from "react";
 import { AiOutlineEdit } from "react-icons/ai";
 import { config } from "../../../config";
-import axios from "axios";
 import axiosInstance from "@/utils/axiosInstance";
 
 export type SystemConfig = {
@@ -38,43 +37,46 @@ export type SystemConfig = {
   status: string; //status
 };
 
-type OpenCloseConfigProps = {
+type ExtendPlaytimeConfigProps = {
   systemConfigData: SystemConfig | null;
   isLoading: boolean;
 };
 
-export default function OpenCloseConfig({
+export default function ExtendPlaytimeConfig({
   systemConfigData,
   isLoading,
-}: OpenCloseConfigProps) {
-  const [openTime, setOpenTime] = useState<string>("");
-  const [closeTime, setCloseTime] = useState<string>("");
-  const [status, setStatus] = useState<string>("active");
-  const [verificationDuration, setVerificationDuration] = useState<number>(0);
+}: ExtendPlaytimeConfigProps) {
   const backendApi = config.BACKEND_API;
+
+  const [minExtend, setMinExtend] = useState<number>(0);
+  const [maxExtend, setMaxExtend] = useState<number>(0);
+  const [allowBefore, setAllowBefore] = useState<number>(0);
+  const [cancelAllow, setCancelAllow] = useState<number>(0);
+  const [percentRefund, setPercentRefund] = useState<number>(0);
 
   const [isEditing, setIsEditing] = useState<boolean>(false); // Trạng thái chỉnh sửa
   const [isSaving, setIsSaving] = useState<boolean>(false); // loading khi save
 
   useEffect(() => {
     if (systemConfigData) {
-      setOpenTime(systemConfigData.openTime?.slice(0, 5) || "");
-      setCloseTime(systemConfigData.closeTime?.slice(0, 5) || "");
-      setVerificationDuration(systemConfigData?.verification_OTP_Duration);
+      setMinExtend(systemConfigData.min_Minutes_For_TablesExtend);
+      setMaxExtend(systemConfigData.max_Minutes_For_TablesExtend);
+      setAllowBefore(
+        systemConfigData?.extendAllow_BeforeMinutes_FromTableComplete,
+      );
+      setCancelAllow(systemConfigData.extendCancel_BeforeMinutes_FromPlayTime);
+      setPercentRefund(systemConfigData.percentage_Refund_On_ExtendedTables);
     }
   }, [systemConfigData]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const formattedOpenTime = `${openTime}:00`;
-      const formattedCloseTime = `${closeTime}:00`;
-
       await axiosInstance.put(`${backendApi}/system/1`, {
         id: systemConfigData?.id,
         adminId: systemConfigData?.adminId,
-        openTime: formattedOpenTime,
-        closeTime: formattedCloseTime,
+        openTime: systemConfigData?.openTime,
+        closeTime: systemConfigData?.closeTime,
         appointment_Refund100_HoursFromScheduleTime:
           systemConfigData?.appointment_Refund100_HoursFromScheduleTime,
         appointment_Incoming_HoursFromScheduleTime:
@@ -102,17 +104,12 @@ export default function OpenCloseConfig({
         percentageRefund_IfNot100: systemConfigData?.percentageRefund_IfNot100,
         percentageTimeRange_UntilRequestExpiration:
           systemConfigData?.percentageTimeRange_UntilRequestExpiration,
-        verification_OTP_Duration: verificationDuration,
-        min_Minutes_For_TablesExtend:
-          systemConfigData?.min_Minutes_For_TablesExtend,
-        max_Minutes_For_TablesExtend:
-          systemConfigData?.max_Minutes_For_TablesExtend,
-        extendAllow_BeforeMinutes_FromTableComplete:
-          systemConfigData?.extendAllow_BeforeMinutes_FromTableComplete,
-        extendCancel_BeforeMinutes_FromPlayTime:
-          systemConfigData?.extendCancel_BeforeMinutes_FromPlayTime,
-        percentage_Refund_On_ExtendedTables:
-          systemConfigData?.percentage_Refund_On_ExtendedTables,
+        verification_OTP_Duration: systemConfigData?.verification_OTP_Duration,
+        min_Minutes_For_TablesExtend: minExtend,
+        max_Minutes_For_TablesExtend: maxExtend,
+        extendAllow_BeforeMinutes_FromTableComplete: allowBefore,
+        extendCancel_BeforeMinutes_FromPlayTime: cancelAllow,
+        percentage_Refund_On_ExtendedTables: percentRefund,
         status: systemConfigData?.status,
       });
       console.log("Cập nhật thành công!");
@@ -133,7 +130,7 @@ export default function OpenCloseConfig({
         className="mb-8 p-6 flex justify-between items-center"
       >
         <Typography variant="h6" color="white">
-          Giờ Hoạt Động
+          Cấu hình gia hạn giờ chơi
         </Typography>
         {!isEditing && !isLoading && (
           <AiOutlineEdit
@@ -149,86 +146,120 @@ export default function OpenCloseConfig({
           <div className="text-center py-8">Đang tải dữ liệu...</div>
         ) : (
           <div className="space-y-6">
-            {/* Thời gian mở cửa */}
             <div>
               <Typography variant="small" color="blue-gray" className="mb-2">
-                Thời gian mở cửa
-              </Typography>
-              {!isEditing ? (
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="text-lg font-semibold"
-                >
-                  {openTime}
-                </Typography>
-              ) : (
-                <select
-                  value={openTime}
-                  onChange={(e) => setOpenTime(e.target.value)}
-                  className="w-full"
-                >
-                  {Array.from({ length: 24 }).map((_, i) => {
-                    const hour = i.toString().padStart(2, "0");
-                    return (
-                      <option key={i} value={`${hour}:00`}>
-                        {hour}:00
-                      </option>
-                    );
-                  })}
-                </select>
-              )}
-            </div>
-
-            {/* Thời gian đóng cửa */}
-            <div>
-              <Typography variant="small" color="blue-gray" className="mb-2">
-                Thời gian đóng cửa
-              </Typography>
-              {!isEditing ? (
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="text-lg font-semibold"
-                >
-                  {closeTime}
-                </Typography>
-              ) : (
-                <select
-                  value={closeTime}
-                  onChange={(e) => setCloseTime(e.target.value)}
-                  className="w-full"
-                >
-                  {Array.from({ length: 24 }).map((_, i) => {
-                    const hour = i.toString().padStart(2, "0");
-                    return (
-                      <option key={i} value={`${hour}:00`}>
-                        {hour}:00
-                      </option>
-                    );
-                  })}
-                </select>
-              )}
-            </div>
-
-            <div>
-              <Typography variant="small" color="blue-gray" className="mb-2">
-                Thời gian hết hạn của OTP
+                Thời gian tối thiểu được gia hạn
               </Typography>
               {!isEditing ? (
                 <Typography className="text-lg font-semibold">
-                  {verificationDuration} phút
+                  {minExtend} phút
                 </Typography>
               ) : (
                 <input
                   type="number"
                   step="0.01"
                   className="w-full p-2 border rounded"
-                  value={verificationDuration}
+                  value={minExtend}
                   onChange={(e) => {
                     const value = Number(e.target.value);
                     if (value >= 0 || e.target.value === "") {
-                      setVerificationDuration(Number(e.target.value));
+                      setMinExtend(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Thời gian tối đa được gia hạn
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {maxExtend} phút
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  step="0.01"
+                  className="w-full p-2 border rounded"
+                  value={maxExtend}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setMaxExtend(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Cho phép gia hạn khi
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {allowBefore} phút trước khi hết giờ chơi
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  step="0.01"
+                  className="w-full p-2 border rounded"
+                  value={allowBefore}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setAllowBefore(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Cho phép hủy gia hạn khi
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {cancelAllow} phút trước khi hết giờ chơi
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  step="0.01"
+                  className="w-full p-2 border rounded"
+                  value={cancelAllow}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setCancelAllow(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Lượng refund nếu hủy gia hạn
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {percentRefund} %
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  className="w-full p-2 border rounded"
+                  value={percentRefund}
+                  placeholder="%"
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setPercentRefund(Number(e.target.value));
                     }
                   }}
                 />
@@ -244,12 +275,23 @@ export default function OpenCloseConfig({
                   color="red"
                   onClick={() => {
                     setIsEditing(false);
-                    setOpenTime(systemConfigData?.openTime?.slice(0, 5) || "");
-                    setCloseTime(
-                      systemConfigData?.closeTime?.slice(0, 5) || "",
+                    setMinExtend(
+                      systemConfigData?.min_Minutes_For_TablesExtend || 0,
                     );
-                    setVerificationDuration(
-                      systemConfigData?.verification_OTP_Duration || 0,
+                    setMaxExtend(
+                      systemConfigData?.max_Minutes_For_TablesExtend || 0,
+                    );
+                    setAllowBefore(
+                      systemConfigData?.extendAllow_BeforeMinutes_FromTableComplete ||
+                        0,
+                    );
+                    setCancelAllow(
+                      systemConfigData?.extendCancel_BeforeMinutes_FromPlayTime ||
+                        0,
+                    );
+                    setPercentRefund(
+                      systemConfigData?.percentage_Refund_On_ExtendedTables ||
+                        0,
                     );
                   }}
                   disabled={isSaving}

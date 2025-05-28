@@ -33,6 +33,7 @@ type AppointmentData = {
   totalPrice: number;
   status: string;
   createdAt: string;
+  isMonthlyAppointment: boolean;
 };
 
 export default function Appointments() {
@@ -47,6 +48,7 @@ export default function Appointments() {
   const [totalPages, setTotalPages] = useState(1);
   const [appointmentStatus, setAppointmentStatus] = useState<string>("");
   const [orderBy, setOrderBy] = useState("");
+  const [activeTab, setActiveTab] = useState<"monthly" | "all">("all");
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
   const [minutesBeforeSchedule, setMinutesBeforeSchedule] = useState<
@@ -117,26 +119,50 @@ export default function Appointments() {
 
     setLoading(true);
     try {
-      const response = await axiosInstance.get(
-        `${backendApi}/appointments/all/admin`,
-        {
-          signal: controller.signal,
-          params: {
-            "page-number": currentPage,
-            "page-size": 10,
-            ...(appointmentStatus && { Status: appointmentStatus }),
-            ...(orderBy && { "order-by": orderBy }),
-            ...(debouncedSearchValue && {
-              SearchValue: encodeURIComponent(debouncedSearchValue),
-            }),
+      if (activeTab === "all") {
+        const response = await axiosInstance.get(
+          `${backendApi}/appointments/all/admin`,
+          {
+            signal: controller.signal,
+            params: {
+              "page-number": currentPage,
+              "page-size": 10,
+              ...(appointmentStatus && { Status: appointmentStatus }),
+              ...(orderBy && { "order-by": orderBy }),
+              ...(debouncedSearchValue && {
+                SearchValue: encodeURIComponent(debouncedSearchValue),
+              }),
+            },
           },
-        },
-      );
-
-      // Chỉ xử lý nếu là request mới nhất
-      if (requestId === latestRequestId) {
-        setAppointments(response.data.pagedList);
-        setTotalPages(response.data.totalPages);
+        );
+        // Chỉ xử lý nếu là request mới nhất
+        if (requestId === latestRequestId) {
+          setAppointments(response.data.pagedList);
+          setTotalPages(response.data.totalPages);
+        }
+      } else if (activeTab === "monthly") {
+        const response = await axiosInstance.get(
+          `${backendApi}/appointments/all-monthly/admin`,
+          {
+            signal: controller.signal,
+            params: {
+              "page-number": currentPage,
+              "page-size": 10,
+              ...(appointmentStatus && { Status: appointmentStatus }),
+              ...(orderBy && { "order-by": orderBy }),
+              ...(debouncedSearchValue && {
+                SearchValue: encodeURIComponent(debouncedSearchValue),
+              }),
+            },
+          },
+        );
+        // Chỉ xử lý nếu là request mới nhất
+        if (requestId === latestRequestId) {
+          setAppointments(response.data.pagedList);
+          setTotalPages(response.data.totalPages);
+        }
+      } else {
+        setError("Loại lịch không hỗ trợ");
       }
     } catch (error: any) {
       if (axios.isCancel(error)) {
@@ -154,7 +180,13 @@ export default function Appointments() {
   useEffect(() => {
     //console.log("Fetching appointments...");
     fetchAppointments();
-  }, [currentPage, appointmentStatus, orderBy, debouncedSearchValue]);
+  }, [
+    currentPage,
+    appointmentStatus,
+    orderBy,
+    debouncedSearchValue,
+    activeTab,
+  ]);
 
   const fetchAppointmentDetails = async () => {
     try {
@@ -307,6 +339,16 @@ export default function Appointments() {
   const [showCheckoutSuccessPopup, setShowCheckoutSuccessPopup] =
     useState(false);
 
+  const handleTabChange = (value: string | undefined) => {
+    if (value === "monthly" || value === "all") {
+      setActiveTab(value);
+      setCurrentPage(1);
+      setTotalPages(1);
+      setAppointments([]);
+      setLoading(true);
+    }
+  };
+
   const statusColors: Record<string, string> = {
     pending: "yellow",
     confirmed: "green",
@@ -345,6 +387,36 @@ export default function Appointments() {
             </Typography>
           </CardHeader>
           <CardBody className="px-4 pt-0 pb-2 max-h-[70vh] min-h-[500px] overflow-y-auto">
+            <div className="flex space-x-4">
+              <button
+                onClick={() => {
+                  if (activeTab !== "all") {
+                    handleTabChange("all");
+                  }
+                }}
+                className={`px-4 py-2 rounded-lg font-semibold transition ${
+                  activeTab === "all"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                Tất cả
+              </button>
+              <button
+                onClick={() => {
+                  if (activeTab !== "monthly") {
+                    handleTabChange("monthly");
+                  }
+                }}
+                className={`px-4 py-2 rounded-lg font-semibold transition ${
+                  activeTab === "monthly"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-400 text-gray-700"
+                }`}
+              >
+                Lịch định kỳ
+              </button>
+            </div>
             <div className="flex gap-4 p-4">
               <div className="flex-shrink-0">
                 <Select
@@ -450,26 +522,36 @@ export default function Appointments() {
             ) : (
               appointments.map((appointment) => {
                 return (
-                  <Card key={appointment.appointmentId} className="mb-4 shadow">
+                  <Card
+                    key={appointment.appointmentId}
+                    className={`mb-4 shadow ${appointment.isMonthlyAppointment ? "border border-green-500 bg-green-50 hover:bg-green-100" : "hover:bg-gray-50"}`}
+                  >
                     <CardBody>
                       {/* Header chính của appointment */}
-                      <div className="flex flex-col gap-2">
+                      <div className={`flex flex-col gap-2`}>
                         <div
-                          className="flex items-start justify-between cursor-pointer hover:bg-gray-50 rounded-md p-2"
+                          className={`flex items-start justify-between cursor-pointer rounded-md p-2 transition
+      `}
                           onClick={() => {
-                            setclickedAppointmentId(null); // Reset trước
+                            setclickedAppointmentId(null);
                             setTimeout(() => {
                               setclickedAppointmentId(
                                 appointment.appointmentId,
-                              ); // Gán lại sau 1 tick
+                              );
                               setShowDetailsPopup(true);
                             }, 0);
                           }}
                         >
                           <div className="flex gap-4 items-start">
                             <div>
-                              <Typography variant="small" className="font-bold">
+                              <Typography
+                                variant="small"
+                                className="font-bold flex items-center gap-1"
+                              >
                                 ID: {appointment.appointmentId}
+                                {appointment.isMonthlyAppointment && (
+                                  <span title="Lịch định kỳ"></span>
+                                )}
                               </Typography>
                               <Typography className="text-sm text-blue-gray-600">
                                 {appointment.user?.fullName} (
@@ -478,6 +560,11 @@ export default function Appointments() {
                               <Typography className="text-xs text-blue-gray-400">
                                 {appointment.user?.email}
                               </Typography>
+                              {appointment.isMonthlyAppointment && (
+                                <span className="inline-block mt-1 text-xs px-2 py-0.5 bg-green-500 text-white rounded-full">
+                                  Lịch định kỳ
+                                </span>
+                              )}
                             </div>
                           </div>
 
@@ -585,12 +672,43 @@ export default function Appointments() {
                         )}
                       </Typography>
                       <Typography>
+                        Trả giúp đối thủ:{" "}
+                        {table.paidForOpponent ? "Có" : "Không"}
+                      </Typography>
+                      {table.note && (
+                        <Typography className="italic text-sm text-gray-600">
+                          Ghi chú: {table.note}
+                        </Typography>
+                      )}
+                      <Typography>
                         Giá:{" "}
                         {table.price.toLocaleString("vi-VN", {
                           style: "currency",
                           currency: "VND",
                         })}
                       </Typography>
+                      {appointmentDetails.appointmentrequests?.[0]
+                        ?.toUserNavigation && (
+                        <div className="flex items-center gap-4 mb-4">
+                          <Typography>Bạn chơi cùng:</Typography>
+                          <img
+                            src={
+                              appointmentDetails.appointmentrequests[0]
+                                .toUserNavigation.avatarUrl
+                            }
+                            alt="avatar"
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                          <div>
+                            <Typography className="text-md text-gray-600">
+                              {
+                                appointmentDetails.appointmentrequests[0]
+                                  .toUserNavigation.username
+                              }
+                            </Typography>
+                          </div>
+                        </div>
+                      )}
                       {/* Các nút điều khiển */}
                       <div className="flex gap-3 flex-wrap">
                         {/* Nút Hủy Bàn */}

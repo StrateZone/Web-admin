@@ -20,7 +20,7 @@ const RoomTypeList: React.FC = () => {
   const fetchRoomTypes = async () => {
     try {
       const res = await axiosInstance.get<string[]>(
-        `${backendApi}/rooms/roomtypes`,
+        `${backendApi}/rooms/roomtypes/admin`,
       );
       setRoomTypes(res.data);
     } catch (error) {
