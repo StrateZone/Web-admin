@@ -40,6 +40,8 @@ export type SystemConfig = {
   extendAllow_BeforeMinutes_FromTableComplete: number;
   extendCancel_BeforeMinutes_FromPlayTime: number;
   percentage_Refund_On_ExtendedTables: number;
+  max_Tables_Extends_Count: number;
+  min_Tables_For_MonthlyAppointment: number;
   status: string; //status
 };
 

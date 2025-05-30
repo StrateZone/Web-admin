@@ -34,6 +34,8 @@ export type SystemConfig = {
   extendAllow_BeforeMinutes_FromTableComplete: number;
   extendCancel_BeforeMinutes_FromPlayTime: number;
   percentage_Refund_On_ExtendedTables: number;
+  max_Tables_Extends_Count: number;
+  min_Tables_For_MonthlyAppointment: number;
   status: string; //status
 };
 
@@ -53,6 +55,7 @@ export default function ExtendPlaytimeConfig({
   const [allowBefore, setAllowBefore] = useState<number>(0);
   const [cancelAllow, setCancelAllow] = useState<number>(0);
   const [percentRefund, setPercentRefund] = useState<number>(0);
+  const [maxExtendCount, setMaxExtendCount] = useState<number>(0);
 
   const [isEditing, setIsEditing] = useState<boolean>(false); // Trạng thái chỉnh sửa
   const [isSaving, setIsSaving] = useState<boolean>(false); // loading khi save
@@ -66,6 +69,7 @@ export default function ExtendPlaytimeConfig({
       );
       setCancelAllow(systemConfigData.extendCancel_BeforeMinutes_FromPlayTime);
       setPercentRefund(systemConfigData.percentage_Refund_On_ExtendedTables);
+      setMaxExtendCount(systemConfigData.max_Tables_Extends_Count);
     }
   }, [systemConfigData]);
 
@@ -110,6 +114,9 @@ export default function ExtendPlaytimeConfig({
         extendAllow_BeforeMinutes_FromTableComplete: allowBefore,
         extendCancel_BeforeMinutes_FromPlayTime: cancelAllow,
         percentage_Refund_On_ExtendedTables: percentRefund,
+        max_Tables_Extends_Count: maxExtendCount,
+        min_Tables_For_MonthlyAppointment:
+          systemConfigData?.min_Tables_For_MonthlyAppointment,
         status: systemConfigData?.status,
       });
       console.log("Cập nhật thành công!");
@@ -266,6 +273,30 @@ export default function ExtendPlaytimeConfig({
               )}
             </div>
 
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Số lần được gia hạn
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {maxExtendCount} lần
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  step="0.01"
+                  className="w-full p-2 border rounded"
+                  value={maxExtendCount}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setMaxExtendCount(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
             {isEditing && (
               <div className="flex justify-end gap-4">
                 <Button color="green" onClick={handleSave} disabled={isSaving}>
@@ -292,6 +323,9 @@ export default function ExtendPlaytimeConfig({
                     setPercentRefund(
                       systemConfigData?.percentage_Refund_On_ExtendedTables ||
                         0,
+                    );
+                    setMaxExtendCount(
+                      systemConfigData?.max_Tables_Extends_Count || 0,
                     );
                   }}
                   disabled={isSaving}
