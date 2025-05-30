@@ -35,6 +35,8 @@ export type SystemConfig = {
   extendAllow_BeforeMinutes_FromTableComplete: number;
   extendCancel_BeforeMinutes_FromPlayTime: number;
   percentage_Refund_On_ExtendedTables: number;
+  max_Tables_Extends_Count: number;
+  min_Tables_For_MonthlyAppointment: number;
   status: string; //status
 };
 
@@ -115,6 +117,9 @@ export default function ConfigCommunityPoint({
           systemConfigData?.extendCancel_BeforeMinutes_FromPlayTime,
         percentage_Refund_On_ExtendedTables:
           systemConfigData?.percentage_Refund_On_ExtendedTables,
+        max_Tables_Extends_Count: systemConfigData?.max_Tables_Extends_Count,
+        min_Tables_For_MonthlyAppointment:
+          systemConfigData?.min_Tables_For_MonthlyAppointment,
         status: systemConfigData?.status,
       });
       console.log("Cập nhật thành công!");

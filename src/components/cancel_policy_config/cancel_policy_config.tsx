@@ -35,6 +35,8 @@ export type SystemConfig = {
   extendAllow_BeforeMinutes_FromTableComplete: number;
   extendCancel_BeforeMinutes_FromPlayTime: number;
   percentage_Refund_On_ExtendedTables: number;
+  max_Tables_Extends_Count: number;
+  min_Tables_For_MonthlyAppointment: number;
   status: string; //status
 };
 
@@ -58,6 +60,7 @@ export default function CancelPolicyConfig({
   const [minInvitationExpiry, setMinInvitationExpiry] = useState<number>(0);
   const [refundOtherThan100, setRefundOtherThan100] = useState<number>(0);
   const [invitaionExpiry, setInvitaionExpiry] = useState<number>(0);
+  const [minTableMonthly, setMinTableMonthly] = useState<number>(0);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -90,6 +93,7 @@ export default function CancelPolicyConfig({
         (systemConfigData.percentageTimeRange_UntilRequestExpiration ?? 0) *
           100,
       );
+      setMinTableMonthly(systemConfigData.min_Tables_For_MonthlyAppointment);
     }
   }, [systemConfigData]);
 
@@ -129,6 +133,8 @@ export default function CancelPolicyConfig({
           systemConfigData?.extendCancel_BeforeMinutes_FromPlayTime,
         percentage_Refund_On_ExtendedTables:
           systemConfigData?.percentage_Refund_On_ExtendedTables,
+        max_Tables_Extends_Count: systemConfigData?.max_Tables_Extends_Count,
+        min_Tables_For_MonthlyAppointment: minTableMonthly,
         status: systemConfigData?.status,
       });
       setIsEditing(false);
@@ -159,7 +165,7 @@ export default function CancelPolicyConfig({
         className="mb-8 p-6 flex justify-between items-center"
       >
         <Typography variant="h6" color="white">
-          Chính Sách Hủy & Checkin
+          Chính Sách Đặt Hẹn
         </Typography>
         {!isEditing && !isLoading && (
           <AiOutlineEdit
@@ -390,6 +396,29 @@ export default function CancelPolicyConfig({
               )}
             </div>
 
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Số bàn tối thiểu khi đặt lịch định kỳ
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {minTableMonthly} bàn
+                </Typography>
+              ) : (
+                <input
+                  type="number"
+                  className="w-full p-2 border rounded"
+                  value={minTableMonthly}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0 || e.target.value === "") {
+                      setMinTableMonthly(Number(e.target.value));
+                    }
+                  }}
+                />
+              )}
+            </div>
+
             {isEditing && (
               <div className="flex justify-end gap-4">
                 <Button color="green" onClick={handleSave} disabled={isSaving}>
@@ -431,6 +460,10 @@ export default function CancelPolicyConfig({
                     setInvitaionExpiry(
                       (systemConfigData?.percentageTimeRange_UntilRequestExpiration ??
                         0) * 100,
+                    );
+
+                    setMinTableMonthly(
+                      systemConfigData?.min_Tables_For_MonthlyAppointment ?? 0,
                     );
                   }}
                   disabled={isSaving}
