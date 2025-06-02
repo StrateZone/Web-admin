@@ -42,6 +42,7 @@ export type SystemConfig = {
   percentage_Refund_On_ExtendedTables: number;
   max_Tables_Extends_Count: number;
   min_Tables_For_MonthlyAppointment: number;
+  enable_AutoCheckin_ForExtendedTables: boolean;
   status: string; //status
 };
 
