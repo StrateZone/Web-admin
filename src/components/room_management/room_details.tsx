@@ -20,6 +20,7 @@ interface Room {
   status: string;
   price: number;
   unit: string;
+  isForMonthlyBooking: boolean;
   tables: Table[];
 }
 
@@ -46,6 +47,28 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
   const [actionType, setActionType] = useState<"disable" | "enable" | null>(
     null,
   );
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    roomName: "",
+    type: "",
+    description: "",
+    capacity: 0,
+    status: "available",
+    isForMonthlyBooking: false,
+  });
+
+  useEffect(() => {
+    if (room) {
+      setEditForm({
+        roomName: room.roomName,
+        type: room.type,
+        description: room.description,
+        capacity: room.capacity,
+        status: room.status,
+        isForMonthlyBooking: room.isForMonthlyBooking,
+      });
+    }
+  }, [room]);
 
   const [loading, setLoading] = useState(true);
 
@@ -59,13 +82,17 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-500"; // Màu xanh cho "active"
+        return "bg-green-500";
       case "has_room":
-        return "bg-yellow-500"; // Màu vàng cho "has_room"
+        return "bg-yellow-500";
       case "out_of_service":
-        return "bg-red-500"; // Màu đỏ cho "out_of_service"
+        return "bg-red-500";
+      case "available":
+        return "bg-green-500";
+      case "unavailable":
+        return "bg-red-500";
       default:
-        return "bg-gray-500"; // Màu xám mặc định
+        return "bg-gray-500";
     }
   };
 
@@ -78,26 +105,30 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
         return "Có phòng";
       case "out_of_service":
         return "Ngưng hoạt động";
+      case "available":
+        return "Đang hoạt động";
+      case "unavailable":
+        return "Ngưng hoạt động";
       default:
         return "Không xác định";
     }
   };
 
+  const fetchRoomDetail = async () => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get(`${backendApi}/rooms/${roomId}`);
+      setRoom(res.data);
+      setTables(res.data.tables || []);
+    } catch (error) {
+      console.error("Lỗi khi tải chi tiết phòng:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch room detail
   useEffect(() => {
-    const fetchRoomDetail = async () => {
-      setLoading(true);
-      try {
-        const res = await axiosInstance.get(`${backendApi}/rooms/${roomId}`);
-        setRoom(res.data);
-        setTables(res.data.tables || []);
-      } catch (error) {
-        console.error("Lỗi khi tải chi tiết phòng:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRoomDetail();
   }, [backendApi, roomId]);
 
@@ -147,6 +178,21 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
     }
   };
 
+  const handleUpdateRoom = async () => {
+    if (!room) return;
+    try {
+      await axiosInstance.put(`${backendApi}/rooms/${room.roomId}`, {
+        roomId: room.roomId,
+        ...editForm,
+      });
+      setEditing(false);
+      fetchRoomDetail();
+    } catch (error) {
+      console.error("Lỗi khi cập nhật phòng:", error);
+      alert("Cập nhật thất bại!");
+    }
+  };
+
   const openConfirmPopup = (tableId: number, type: "disable" | "enable") => {
     setSelectedTableId(tableId);
     setActionType(type);
@@ -180,6 +226,18 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
       setConfirmOpen(false);
       setSelectedTableId(null);
       setActionType(null);
+    }
+  };
+
+  const handleRoomStatusChange = async (action: "enable" | "disable") => {
+    if (!room) return;
+    const url = `${backendApi}/rooms/${action}/${room.roomId}`;
+    try {
+      await axiosInstance.put(url);
+      fetchRoomDetail(); // Refresh lại sau khi thay đổi trạng thái
+    } catch (error) {
+      console.error(`Lỗi khi ${action} phòng:`, error);
+      alert(`Không thể ${action === "disable" ? "ngưng" : "kích hoạt"} phòng.`);
     }
   };
 
@@ -218,6 +276,12 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
           <p className="text-lg text-gray-600 mt-2 whitespace-pre-line">
             Phòng {room.type}
           </p>
+          <p
+            className={`text-sm font-medium inline-block px-3 py-1 rounded-full text-white ${getStatusColor(room.status)}`}
+          >
+            Trạng thái: {getStatusLabel(room.status)}
+          </p>
+
           <p className="text-lg text-gray-600 mt-2 whitespace-pre-line">
             {room.description}
           </p>
@@ -225,6 +289,73 @@ export default function RoomDetail({ roomId, onBack }: RoomDetailProps) {
             <p className="text-sm text-gray-600">
               Số bàn: {tables.length}/{room.capacity}
             </p>
+          </div>
+          {editing ? (
+            <div className="space-y-3">
+              <input
+                className="border p-2 rounded w-full"
+                placeholder="Tên phòng"
+                value={editForm.roomName}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, roomName: e.target.value })
+                }
+              />
+              <textarea
+                className="border p-2 rounded w-full"
+                placeholder="Mô tả"
+                value={editForm.description}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, description: e.target.value })
+                }
+              />
+              <input
+                type="number"
+                className="border p-2 rounded w-full"
+                placeholder="Sức chứa"
+                value={editForm.capacity}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, capacity: Number(e.target.value) })
+                }
+              />
+              <div className="flex gap-4">
+                <button
+                  onClick={handleUpdateRoom}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Lưu
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setEditing(true)}
+              className="mt-4 px-4 py-2 bg-yellow-800 text-white rounded hover:bg-yellow-900"
+            >
+              Chỉnh sửa thông tin phòng
+            </button>
+          )}
+          <div className="mt-4 flex gap-4">
+            {room.status === "unavailable" ? (
+              <button
+                onClick={() => handleRoomStatusChange("enable")}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
+                Kích hoạt phòng
+              </button>
+            ) : (
+              <button
+                onClick={() => handleRoomStatusChange("disable")}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Ngưng hoạt động phòng
+              </button>
+            )}
           </div>
         </div>
 

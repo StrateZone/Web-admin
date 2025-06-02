@@ -36,6 +36,7 @@ export type SystemConfig = {
   percentage_Refund_On_ExtendedTables: number;
   max_Tables_Extends_Count: number;
   min_Tables_For_MonthlyAppointment: number;
+  enable_AutoCheckin_ForExtendedTables: boolean;
   status: string; //status
 };
 
@@ -56,6 +57,7 @@ export default function ExtendPlaytimeConfig({
   const [cancelAllow, setCancelAllow] = useState<number>(0);
   const [percentRefund, setPercentRefund] = useState<number>(0);
   const [maxExtendCount, setMaxExtendCount] = useState<number>(0);
+  const [autoCheckingExtend, setAutoCheckingExtend] = useState<boolean>(false);
 
   const [isEditing, setIsEditing] = useState<boolean>(false); // Trạng thái chỉnh sửa
   const [isSaving, setIsSaving] = useState<boolean>(false); // loading khi save
@@ -70,6 +72,9 @@ export default function ExtendPlaytimeConfig({
       setCancelAllow(systemConfigData.extendCancel_BeforeMinutes_FromPlayTime);
       setPercentRefund(systemConfigData.percentage_Refund_On_ExtendedTables);
       setMaxExtendCount(systemConfigData.max_Tables_Extends_Count);
+      setAutoCheckingExtend(
+        systemConfigData.enable_AutoCheckin_ForExtendedTables,
+      );
     }
   }, [systemConfigData]);
 
@@ -117,6 +122,7 @@ export default function ExtendPlaytimeConfig({
         max_Tables_Extends_Count: maxExtendCount,
         min_Tables_For_MonthlyAppointment:
           systemConfigData?.min_Tables_For_MonthlyAppointment,
+        enable_AutoCheckin_ForExtendedTables: autoCheckingExtend,
         status: systemConfigData?.status,
       });
       console.log("Cập nhật thành công!");
@@ -297,6 +303,27 @@ export default function ExtendPlaytimeConfig({
               )}
             </div>
 
+            <div>
+              <Typography variant="small" color="blue-gray" className="mb-2">
+                Tự động điểm danh khi tới giờ gia hạn
+              </Typography>
+              {!isEditing ? (
+                <Typography className="text-lg font-semibold">
+                  {autoCheckingExtend ? "Bật" : "Tắt"}
+                </Typography>
+              ) : (
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={autoCheckingExtend}
+                    onChange={(e) => setAutoCheckingExtend(e.target.checked)}
+                    className="h-5 w-5"
+                  />
+                  <span>{autoCheckingExtend ? "Bật" : "Tắt"}</span>
+                </label>
+              )}
+            </div>
+
             {isEditing && (
               <div className="flex justify-end gap-4">
                 <Button color="green" onClick={handleSave} disabled={isSaving}>
@@ -326,6 +353,10 @@ export default function ExtendPlaytimeConfig({
                     );
                     setMaxExtendCount(
                       systemConfigData?.max_Tables_Extends_Count || 0,
+                    );
+                    setAutoCheckingExtend(
+                      systemConfigData?.enable_AutoCheckin_ForExtendedTables ||
+                        false,
                     );
                   }}
                   disabled={isSaving}

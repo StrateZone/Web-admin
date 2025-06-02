@@ -37,6 +37,7 @@ export type SystemConfig = {
   percentage_Refund_On_ExtendedTables: number;
   max_Tables_Extends_Count: number;
   min_Tables_For_MonthlyAppointment: number;
+  enable_AutoCheckin_ForExtendedTables: boolean;
   status: string; //status
 };
 
@@ -135,6 +136,8 @@ export default function CancelPolicyConfig({
           systemConfigData?.percentage_Refund_On_ExtendedTables,
         max_Tables_Extends_Count: systemConfigData?.max_Tables_Extends_Count,
         min_Tables_For_MonthlyAppointment: minTableMonthly,
+        enable_AutoCheckin_ForExtendedTables:
+          systemConfigData?.enable_AutoCheckin_ForExtendedTables,
         status: systemConfigData?.status,
       });
       setIsEditing(false);

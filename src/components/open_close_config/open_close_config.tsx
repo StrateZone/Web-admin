@@ -37,6 +37,7 @@ export type SystemConfig = {
   percentage_Refund_On_ExtendedTables: number;
   max_Tables_Extends_Count: number;
   min_Tables_For_MonthlyAppointment: number;
+  enable_AutoCheckin_ForExtendedTables: boolean;
   status: string; //status
 };
 
@@ -118,6 +119,8 @@ export default function OpenCloseConfig({
         max_Tables_Extends_Count: systemConfigData?.max_Tables_Extends_Count,
         min_Tables_For_MonthlyAppointment:
           systemConfigData?.min_Tables_For_MonthlyAppointment,
+        enable_AutoCheckin_ForExtendedTables:
+          systemConfigData?.enable_AutoCheckin_ForExtendedTables,
         status: systemConfigData?.status,
       });
       console.log("Cập nhật thành công!");

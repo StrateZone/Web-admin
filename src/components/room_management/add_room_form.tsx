@@ -21,12 +21,15 @@ function AddRoomPopup({
     description: "",
     capacity: 0,
     status: "available",
+    isForMonthlyBooking: false, // Thêm dòng này
   });
 
   useEffect(() => {
     const fetchRoomTypes = async () => {
       try {
-        const res = await axiosInstance.get(`${backendApi}/rooms/roomtypes`);
+        const res = await axiosInstance.get(
+          `${backendApi}/rooms/roomtypes/admin`,
+        );
         setRoomTypes(res.data);
       } catch (err) {
         console.error("Không thể tải danh sách loại phòng:", err);
@@ -109,6 +112,26 @@ function AddRoomPopup({
             onChange={handleChange}
             className="w-full p-2 border rounded text-black"
           />
+          <Typography variant="h6" className="mb-2 text-black">
+            Dành cho đặt lịch theo tháng
+          </Typography>
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="isForMonthlyBooking"
+              checked={formData.isForMonthlyBooking}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  isForMonthlyBooking: e.target.checked,
+                }))
+              }
+              className="h-5 w-5"
+            />
+            <span className="text-black">
+              {formData.isForMonthlyBooking ? "Có" : "Không"}
+            </span>
+          </label>
         </div>
         <div className="flex justify-end mt-4 gap-2">
           <Button onClick={onClose} variant="text">

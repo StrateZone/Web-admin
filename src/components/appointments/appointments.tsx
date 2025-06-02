@@ -632,161 +632,166 @@ export default function Appointments() {
                   />
 
                   <Typography className="mt-4">Các bàn:</Typography>
-                  {appointmentDetails.tablesAppointments?.map((table: any) => (
-                    <div
-                      key={table.id}
-                      className="mt-2 p-2 border-2 border-gray-400 rounded-md"
-                    >
-                      <Typography>Bàn số: {table.tableId}</Typography>
-                      <Typography>Phòng: {table.table.roomName}</Typography>
-                      <Typography>
-                        Loại cờ: {table.table.gameType.typeName}
-                      </Typography>
-                      <Chip
-                        variant="gradient"
-                        color={(statusColors[table.status] as color) || "gray"}
-                        value={statusLabels[table.status]}
-                        className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                      />
-                      <Typography>
-                        Giờ bắt đầu:{" "}
-                        {new Date(table.scheduleTime).toLocaleTimeString(
-                          "vi-VN",
-                          {
+                  {appointmentDetails.tablesAppointments?.map((table: any) => {
+                    const acceptedRequest =
+                      appointmentDetails.appointmentrequests?.find(
+                        (req: any) =>
+                          req.status === "accepted" &&
+                          req.tableId === table.tableId,
+                      );
+
+                    return (
+                      <div
+                        key={table.id}
+                        className="mt-2 p-2 border-2 border-gray-400 rounded-md"
+                      >
+                        <Typography>Bàn số: {table.tableId}</Typography>
+                        <Typography>Phòng: {table.table.roomName}</Typography>
+                        <Typography>
+                          Loại cờ: {table.table.gameType.typeName}
+                        </Typography>
+                        <Chip
+                          variant="gradient"
+                          color={
+                            (statusColors[table.status] as color) || "gray"
+                          }
+                          value={statusLabels[table.status]}
+                          className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                        />
+                        <Typography>
+                          Giờ bắt đầu:{" "}
+                          {new Date(table.scheduleTime).toLocaleTimeString(
+                            "vi-VN",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
+                        </Typography>
+                        <Typography>
+                          Giờ kết thúc:{" "}
+                          {new Date(table.endTime).toLocaleTimeString("vi-VN", {
                             hour: "2-digit",
                             minute: "2-digit",
-                          },
-                        )}
-                      </Typography>
-                      <Typography>
-                        Giờ kết thúc:{" "}
-                        {new Date(table.endTime).toLocaleTimeString("vi-VN", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </Typography>
-                      <Typography>
-                        Ngày:{" "}
-                        {new Date(table.scheduleTime).toLocaleDateString(
-                          "vi-VN",
-                        )}
-                      </Typography>
-                      <Typography>
-                        Trả giúp đối thủ:{" "}
-                        {table.paidForOpponent ? "Có" : "Không"}
-                      </Typography>
-                      {table.note && (
-                        <Typography className="italic text-sm text-gray-600">
-                          Ghi chú: {table.note}
+                          })}
                         </Typography>
-                      )}
-                      <Typography>
-                        Giá:{" "}
-                        {table.price.toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        })}
-                      </Typography>
-                      {appointmentDetails.appointmentrequests?.[0]
-                        ?.toUserNavigation && (
-                        <div className="flex items-center gap-4 mb-4">
-                          <Typography>Bạn chơi cùng:</Typography>
-                          <img
-                            src={
-                              appointmentDetails.appointmentrequests[0]
-                                .toUserNavigation.avatarUrl
-                            }
-                            alt="avatar"
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                          <div>
-                            <Typography className="text-md text-gray-600">
-                              {
-                                appointmentDetails.appointmentrequests[0]
-                                  .toUserNavigation.username
-                              }
-                            </Typography>
+                        <Typography>
+                          Ngày:{" "}
+                          {new Date(table.scheduleTime).toLocaleDateString(
+                            "vi-VN",
+                          )}
+                        </Typography>
+                        <Typography>
+                          Trả giúp đối thủ:{" "}
+                          {table.paidForOpponent ? "Có" : "Không"}
+                        </Typography>
+                        {table.note && (
+                          <Typography className="italic text-sm text-gray-600">
+                            Ghi chú: {table.note}
+                          </Typography>
+                        )}
+                        <Typography>
+                          Giá:{" "}
+                          {table.price.toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          })}
+                        </Typography>
+
+                        {/* ✅ Chỉ hiển thị người chơi nếu có lời mời accepted cho bàn này */}
+                        {acceptedRequest?.toUserNavigation && (
+                          <div className="flex items-center gap-4 mb-4 mt-2">
+                            <Typography>Bạn chơi cùng:</Typography>
+                            <img
+                              src={acceptedRequest.toUserNavigation.avatarUrl}
+                              alt="avatar"
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                            <div>
+                              <Typography className="text-md text-gray-600">
+                                {acceptedRequest.toUserNavigation.username}
+                              </Typography>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {/* Các nút điều khiển */}
-                      <div className="flex gap-3 flex-wrap">
-                        {/* Nút Hủy Bàn */}
-                        {isAdmin && (
-                          <Button
-                            variant="gradient"
-                            color="red"
-                            onClick={() =>
-                              handleCancelClick(
-                                table.id,
-                                appointmentDetails.userId,
-                                {
-                                  tableId: table.tableId,
-                                  roomName: table.table.roomName,
-                                  roomType: table.table.roomType,
-                                  scheduleTime: new Date(
-                                    table.scheduleTime,
-                                  ).toLocaleString("vi-VN"),
-                                  endTime: new Date(
-                                    table.endTime,
-                                  ).toLocaleString("vi-VN"),
-                                  date: new Date(
-                                    table.scheduleTime,
-                                  ).toLocaleDateString("vi-VN"),
-                                  price: table.price,
-                                },
-                              )
-                            }
-                            disabled={
-                              !["pending", "confirmed"].includes(table.status)
-                            }
-                          >
-                            Hủy Bàn
-                          </Button>
                         )}
 
-                        {/* Nút Điểm danh / Hoàn tất */}
-                        {table.status === "checked_in" ? (
-                          <Button
-                            variant="gradient"
-                            color="green"
-                            onClick={() =>
-                              handleCompleteClick(
-                                table.id,
-                                appointmentDetails.userId,
-                              )
-                            }
-                          >
-                            Check-out
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="gradient"
-                            color="blue"
-                            onClick={() =>
-                              handleCheckinClick(
-                                table.id,
-                                appointmentDetails.userId,
-                              )
-                            }
-                            disabled={
-                              !(
-                                table.status === "incoming" &&
-                                minutesBeforeSchedule !== null &&
-                                new Date() >=
-                                  new Date(
-                                    new Date(table.scheduleTime).getTime() -
-                                      minutesBeforeSchedule * 60 * 1000,
-                                  )
-                              )
-                            }
-                          >
-                            Check-in
-                          </Button>
-                        )}
+                        {/* Các nút điều khiển */}
+                        <div className="flex gap-3 flex-wrap">
+                          {isAdmin && (
+                            <Button
+                              variant="gradient"
+                              color="red"
+                              onClick={() =>
+                                handleCancelClick(
+                                  table.id,
+                                  appointmentDetails.userId,
+                                  {
+                                    tableId: table.tableId,
+                                    roomName: table.table.roomName,
+                                    roomType: table.table.roomType,
+                                    scheduleTime: new Date(
+                                      table.scheduleTime,
+                                    ).toLocaleString("vi-VN"),
+                                    endTime: new Date(
+                                      table.endTime,
+                                    ).toLocaleString("vi-VN"),
+                                    date: new Date(
+                                      table.scheduleTime,
+                                    ).toLocaleDateString("vi-VN"),
+                                    price: table.price,
+                                  },
+                                )
+                              }
+                              disabled={
+                                !["pending", "confirmed"].includes(table.status)
+                              }
+                            >
+                              Hủy Bàn
+                            </Button>
+                          )}
+
+                          {table.status === "checked_in" ? (
+                            <Button
+                              variant="gradient"
+                              color="green"
+                              onClick={() =>
+                                handleCompleteClick(
+                                  table.id,
+                                  appointmentDetails.userId,
+                                )
+                              }
+                            >
+                              Check-out
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="gradient"
+                              color="blue"
+                              onClick={() =>
+                                handleCheckinClick(
+                                  table.id,
+                                  appointmentDetails.userId,
+                                )
+                              }
+                              disabled={
+                                !(
+                                  table.status === "incoming" &&
+                                  minutesBeforeSchedule !== null &&
+                                  new Date() >=
+                                    new Date(
+                                      new Date(table.scheduleTime).getTime() -
+                                        minutesBeforeSchedule * 60 * 1000,
+                                    )
+                                )
+                              }
+                            >
+                              Check-in
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </DialogBody>
                 <DialogFooter>
                   <Button
